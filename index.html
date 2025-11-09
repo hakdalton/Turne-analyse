@@ -686,6 +686,167 @@
         .toggle-switch input:checked + .toggle-slider:before {
             transform: translateX(22px);
         }
+
+        /* Save dialog */
+        #saveDialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        #saveDialog.show {
+            display: flex;
+        }
+
+        #saveDialogContent {
+            background: #1a1a1a;
+            border: 2px solid #4CAF50;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        #saveDialogContent h2 {
+            margin: 0 0 16px 0;
+            font-size: 22px;
+            color: #4CAF50;
+        }
+
+        .save-info {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+
+        .save-info strong {
+            color: #4CAF50;
+            font-size: 20px;
+        }
+
+        #videoName {
+            width: 100%;
+            padding: 12px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        #videoName:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .save-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .save-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .save-btn.primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .save-btn.primary:active {
+            background: #45a049;
+        }
+
+        .save-btn.secondary {
+            background: #333;
+            color: white;
+        }
+
+        .save-btn.secondary:active {
+            background: #444;
+        }
+
+        /* Saved videos list */
+        #savedVideosList {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .saved-video-item {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .saved-video-item:hover {
+            border-color: #4CAF50;
+            background: #222;
+        }
+
+        .saved-video-item:active {
+            transform: scale(0.98);
+        }
+
+        .video-info {
+            flex: 1;
+        }
+
+        .video-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .video-details {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .video-time {
+            color: #4CAF50;
+            font-weight: 600;
+            font-size: 16px;
+            margin-right: 12px;
+        }
+
+        .delete-video-btn {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.4);
+            color: #f44336;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .delete-video-btn:active {
+            background: rgba(244, 67, 54, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -709,6 +870,19 @@
             <!-- Stopwatch overlay -->
             <div id="stopwatchOverlay">
                 <div id="stopwatchTime">0.00</div>
+            </div>
+
+            <!-- Save dialog -->
+            <div id="saveDialog">
+                <div id="saveDialogContent">
+                    <h2>📹 Opname Opslaan</h2>
+                    <p class="save-info">Eindtijd: <strong id="finalTime">0.00s</strong></p>
+                    <input type="text" id="videoName" placeholder="Bijv: Sprint leerling 1" maxlength="50">
+                    <div class="save-buttons">
+                        <button class="save-btn primary" onclick="saveVideo()">💾 Opslaan</button>
+                        <button class="save-btn secondary" onclick="discardVideo()">🗑️ Verwijderen</button>
+                    </div>
+                </div>
             </div>
 
             <div id="topBar">
@@ -836,6 +1010,12 @@
                         </select>
                     </div>
 
+                    <!-- Saved videos -->
+                    <div id="savedVideosSection" style="display: none;">
+                        <h4 style="color: #4CAF50; margin-bottom: 12px; font-size: 14px;">📚 Opgeslagen Video's</h4>
+                        <div id="savedVideosList"></div>
+                    </div>
+
                     <p class="helper-text">💡 Druk op START om te beginnen filmen. De stopwatch start automatisch mee!</p>
                 </div>
 
@@ -901,6 +1081,8 @@
         let stopwatchStartTime = 0;
         let stopwatchElapsed = 0;
         let stopwatchInterval = null;
+        let savedVideos = [];
+        let currentVideoFrames = null;
 
         // Update sliders
         delaySlider.oninput = () => {
@@ -1086,30 +1268,16 @@
                 displayFrame(0);
                 updatePlaybackUI();
             } else if (currentMode === 'stopwatch') {
-                // Stop stopwatch and switch to playback with auto-replay
+                // Stop stopwatch and show save options
                 stopStopwatch();
                 stopwatchOverlay.classList.remove('show');
                 stopwatchTime.classList.remove('running');
                 
-                playbackControls.classList.add('show');
-                stopwatchControls.classList.remove('show');
-                currentFrameIndex = 0;
-                displayFrame(0);
-                updatePlaybackUI();
-                
                 // Set a flag so displayFrame knows not to call redrawAnnotations
                 displayCanvas.dataset.stopwatchMode = 'true';
                 
-                // Auto-start replay after a brief pause
-                setTimeout(() => {
-                    if (frames.length > 0) {
-                        isPlaying = true;
-                        const btn = document.getElementById('playPauseBtn');
-                        btn.innerHTML = '<span style="font-size: 32px;">⏸️</span><span>Pauzeren</span>';
-                        btn.classList.add('playing');
-                        playLoop();
-                    }
-                }, 500);
+                // Show save dialog
+                showSaveDialog();
             }
 
             mainButton.classList.remove('recording');
@@ -1634,6 +1802,123 @@
         document.getElementById('videoContainer').addEventListener('touchmove', (e) => {
             if (isRunning || currentMode === 'record') e.preventDefault();
         }, { passive: false });
+
+        // Save dialog and video library functions
+        function showSaveDialog() {
+            const dialog = document.getElementById('saveDialog');
+            document.getElementById('finalTime').textContent = stopwatchElapsed.toFixed(2) + 's';
+            document.getElementById('videoName').value = '';
+            dialog.classList.add('show');
+            
+            setTimeout(() => document.getElementById('videoName').focus(), 100);
+        }
+
+        function saveVideo() {
+            const name = document.getElementById('videoName').value.trim() || 'Sprint ' + (savedVideos.length + 1);
+            
+            const video = {
+                id: Date.now(),
+                name: name,
+                time: stopwatchElapsed.toFixed(2),
+                date: new Date().toLocaleString('nl-NL'),
+                frames: frames.length
+            };
+            
+            savedVideos.push(video);
+            
+            try {
+                localStorage.setItem('savedStopwatchVideos', JSON.stringify(savedVideos));
+            } catch (e) {
+                alert('Kan video niet opslaan. Te weinig ruimte.');
+            }
+            
+            currentVideoFrames = [...frames];
+            
+            document.getElementById('saveDialog').classList.remove('show');
+            updateSavedVideosList();
+            
+            playbackControls.classList.add('show');
+            stopwatchControls.classList.remove('show');
+            currentFrameIndex = 0;
+            displayFrame(0);
+            updatePlaybackUI();
+        }
+
+        function discardVideo() {
+            if (confirm('Weet je zeker dat je deze opname wilt verwijderen?')) {
+                frames = [];
+                currentVideoFrames = null;
+                document.getElementById('saveDialog').classList.remove('show');
+                stopwatchControls.classList.add('show');
+                mainButton.classList.remove('recording');
+                updateUIForMode();
+            }
+        }
+
+        function updateSavedVideosList() {
+            const section = document.getElementById('savedVideosSection');
+            const list = document.getElementById('savedVideosList');
+            
+            if (savedVideos.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            
+            section.style.display = 'block';
+            list.innerHTML = '';
+            
+            [...savedVideos].reverse().forEach(video => {
+                const item = document.createElement('div');
+                item.className = 'saved-video-item';
+                item.innerHTML = `
+                    <div class="video-info">
+                        <div class="video-name">📹 ${video.name}</div>
+                        <div class="video-details">${video.date}</div>
+                    </div>
+                    <div class="video-time">${video.time}s</div>
+                    <button class="delete-video-btn" onclick="deleteSavedVideo(${video.id}); event.stopPropagation();">🗑️</button>
+                `;
+                
+                item.onclick = () => loadSavedVideo(video);
+                list.appendChild(item);
+            });
+        }
+
+        function loadSavedVideo(video) {
+            if (currentVideoFrames && currentVideoFrames.length > 0) {
+                frames = [...currentVideoFrames];
+                displayCanvas.dataset.stopwatchMode = 'true';
+                playbackControls.classList.add('show');
+                stopwatchControls.classList.remove('show');
+                currentFrameIndex = 0;
+                displayFrame(0);
+                updatePlaybackUI();
+            } else {
+                alert('Video frames niet meer beschikbaar.\\nAlleen de laatst opgenomen video kan worden afgespeeld.\\n\\nTip: Download belangrijke video\\'s!');
+            }
+        }
+
+        function deleteSavedVideo(id) {
+            if (confirm('Deze video verwijderen?')) {
+                savedVideos = savedVideos.filter(v => v.id !== id);
+                localStorage.setItem('savedStopwatchVideos', JSON.stringify(savedVideos));
+                updateSavedVideosList();
+            }
+        }
+
+        function loadSavedVideos() {
+            const saved = localStorage.getItem('savedStopwatchVideos');
+            if (saved) {
+                try {
+                    savedVideos = JSON.parse(saved);
+                    updateSavedVideosList();
+                } catch (e) {
+                    savedVideos = [];
+                }
+            }
+        }
+
+        loadSavedVideos();
     </script>
 </body>
 </html>
