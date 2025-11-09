@@ -39,7 +39,7 @@
             flex-direction: column;
         }
 
-        /* Video container */
+        /* Video container - takes full space */
         #videoContainer {
             flex: 1;
             background: #000;
@@ -83,6 +83,7 @@
             text-align: center;
             transition: opacity 0.3s;
             max-width: 90%;
+            padding: 20px;
         }
 
         #welcome.hidden {
@@ -91,29 +92,32 @@
         }
 
         #welcome h1 {
-            font-size: 28px;
-            margin-bottom: 16px;
-            font-weight: 600;
+            font-size: 32px;
+            margin-bottom: 20px;
+            font-weight: 700;
         }
 
         #welcome p {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.6;
+            color: #888;
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 12px;
         }
 
-        /* Top toolbar */
+        /* Top toolbar for drawing tools */
         #topBar {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             padding: env(safe-area-inset-top, 10px) 10px 10px 10px;
-            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 70%, transparent 100%);
+            background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 70%, transparent 100%);
             display: none;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             z-index: 20;
+            max-height: 40vh;
+            overflow-y: auto;
         }
 
         #topBar.show {
@@ -122,7 +126,7 @@
 
         .toolbar-row {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             overflow-x: auto;
             padding-bottom: 4px;
         }
@@ -131,9 +135,9 @@
             background: rgba(255, 255, 255, 0.15);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
             cursor: pointer;
             backdrop-filter: blur(10px);
             white-space: nowrap;
@@ -143,12 +147,10 @@
 
         .tool-btn:active {
             transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.25);
         }
 
         .tool-btn:disabled {
             opacity: 0.4;
-            cursor: not-allowed;
         }
 
         .tool-btn.active {
@@ -156,48 +158,24 @@
             border-color: #4CAF50;
         }
 
-        .tool-btn.danger {
-            background: rgba(244, 67, 54, 0.8);
-        }
-
-        .color-picker {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-
         .color-btn {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             border: 2px solid rgba(255, 255, 255, 0.3);
             cursor: pointer;
             flex-shrink: 0;
-            transition: all 0.2s;
-        }
-
-        .color-btn:active {
-            transform: scale(0.9);
         }
 
         .color-btn.active {
             border-color: white;
             border-width: 3px;
-            box-shadow: 0 0 12px rgba(255,255,255,0.6);
-        }
-
-        .stroke-width {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 6px 10px;
-            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(255,255,255,0.6);
         }
 
         .stroke-btn {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -213,345 +191,10 @@
             border-color: #4CAF50;
         }
 
-        .stroke-preview {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: white;
-        }
-
-        /* Bottom controls */
-        #bottomBar {
-            background: rgba(0, 0, 0, 0.95);
-            padding: 12px 12px calc(env(safe-area-inset-bottom, 12px) + 12px) 12px;
-            border-top: 1px solid #222;
-            max-height: 45vh;
-            overflow-y: auto;
-        }
-
-        /* Mode selector */
-        #modeSelector {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            overflow-x: auto;
-        }
-
-        .mode-btn {
-            flex: 1;
-            min-width: 100px;
-            padding: 12px 8px;
-            background: #1a1a1a;
-            border: 2px solid #333;
-            border-radius: 8px;
-            color: white;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-
-        .mode-btn:active {
-            transform: scale(0.98);
-        }
-
-        .mode-btn.active {
-            background: #4CAF50;
-            border-color: #4CAF50;
-        }
-
-        .mode-btn .emoji {
-            display: block;
-            font-size: 22px;
-            margin-bottom: 4px;
-        }
-
-        /* Controls container */
-        #controlsContainer {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        /* Live mode controls */
-        #liveControls {
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        #liveControls.show {
-            display: flex;
-        }
-
-        .control-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .control-row label {
-            font-size: 12px;
-            color: #888;
-            min-width: 80px;
-        }
-
-        input[type="range"] {
-            flex: 1;
-            height: 36px;
-            background: transparent;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        input[type="range"]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            background: #333;
-            border-radius: 2px;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
-            background: #4CAF50;
-            border-radius: 50%;
-            margin-top: -10px;
-        }
-
-        .value-display {
-            min-width: 50px;
-            text-align: right;
-            color: #4CAF50;
-            font-weight: bold;
-            font-size: 15px;
-        }
-
-        /* Playback controls */
-        #playbackControls {
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        #playbackControls.show {
-            display: flex;
-        }
-
-        /* Timeline */
-        #timelineContainer {
-            background: #1a1a1a;
-            border-radius: 8px;
-            padding: 12px;
-        }
-
-        #timeline {
-            position: relative;
-            height: 50px;
-            background: #0a0a0a;
-            border-radius: 6px;
-            overflow: visible;
-            cursor: pointer;
-            margin-bottom: 8px;
-        }
-
-        #timelineProgress {
-            height: 100%;
-            background: linear-gradient(90deg, #4CAF50 0%, #66BB6A 100%);
-            width: 0%;
-            border-radius: 6px;
-            transition: width 0.05s linear;
-        }
-
-        #timelineHandle {
-            position: absolute;
-            top: -5px;
-            left: 0;
-            width: 6px;
-            height: calc(100% + 10px);
-            background: white;
-            border-radius: 3px;
-            box-shadow: 0 0 12px rgba(255,255,255,0.8), 0 2px 8px rgba(0,0,0,0.4);
-            cursor: grab;
-            transition: left 0.05s linear;
-        }
-
-        #timelineHandle:active {
-            cursor: grabbing;
-            box-shadow: 0 0 16px rgba(255,255,255,1);
-        }
-
-        #frameInfo {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #888;
-        }
-
-        #frameInfo strong {
-            color: #4CAF50;
-        }
-
-        /* Navigation buttons */
-        .nav-buttons {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-            margin-bottom: 8px;
-        }
-
-        .nav-btn {
-            padding: 14px 8px;
-            background: #2a2a2a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .nav-btn:active {
-            background: #3a3a3a;
-            transform: scale(0.95);
-        }
-
-        .nav-btn.primary {
-            background: #4CAF50;
-            border-color: #4CAF50;
-            font-size: 24px;
-        }
-
-        .nav-btn.primary:active {
-            background: #45a049;
-        }
-
-        /* Skip buttons */
-        .skip-buttons {
-            display: flex;
-            gap: 6px;
-        }
-
-        .skip-btn {
-            flex: 1;
-            padding: 10px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: #888;
-            font-size: 11px;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .skip-btn:active {
-            background: #2a2a2a;
-        }
-
-        /* Speed control */
-        #speedControl {
-            background: #1a1a1a;
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        /* Video control button */
-        .video-control-btn {
-            width: 100%;
-            padding: 20px;
-            background: #4CAF50;
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-
-        .video-control-btn:active {
-            background: #45a049;
-            transform: scale(0.98);
-        }
-
-        .video-control-btn.playing {
-            background: #FF9800;
-        }
-
-        .video-control-btn.playing:active {
-            background: #F57C00;
-        }
-
-        /* Main action button */
-        #mainButton {
-            width: 100%;
-            padding: 16px;
-            background: #4CAF50;
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-
-        #mainButton:active {
-            background: #45a049;
-            transform: scale(0.98);
-        }
-
-        #mainButton.recording {
-            background: #f44336;
-        }
-
-        #mainButton.recording:active {
-            background: #da190b;
-        }
-
-        /* Status badge */
-        #statusBadge {
-            position: absolute;
-            top: calc(env(safe-area-inset-top, 20px) + 70px);
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(76, 175, 80, 0.95);
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-            display: none;
-            z-index: 10;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-
-        #statusBadge.show {
-            display: block;
-        }
-
-        #statusBadge.buffering {
-            background: rgba(255, 152, 0, 0.95);
-        }
-
         /* Stopwatch overlay */
         #stopwatchOverlay {
             position: absolute;
-            bottom: 80px;
+            bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
             display: none;
@@ -563,7 +206,7 @@
         }
 
         #stopwatchTime {
-            font-size: 80px;
+            font-size: 72px;
             font-weight: bold;
             color: #00FF00;
             text-shadow: 
@@ -571,121 +214,18 @@
                 0 0 40px rgba(0, 255, 0, 0.5),
                 0 4px 8px rgba(0, 0, 0, 0.8);
             font-family: 'Courier New', monospace;
-            letter-spacing: 0.05em;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 20px 40px;
-            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 16px 32px;
+            border-radius: 12px;
             backdrop-filter: blur(10px);
-            border: 3px solid rgba(0, 255, 0, 0.3);
+            border: 2px solid rgba(0, 255, 0, 0.3);
         }
 
-        #stopwatchTime.running {
-            animation: pulse-glow 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse-glow {
-            0%, 100% { 
-                text-shadow: 
-                    0 0 20px rgba(0, 255, 0, 0.8),
-                    0 0 40px rgba(0, 255, 0, 0.5),
-                    0 4px 8px rgba(0, 0, 0, 0.8);
-            }
-            50% { 
-                text-shadow: 
-                    0 0 30px rgba(0, 255, 0, 1),
-                    0 0 60px rgba(0, 255, 0, 0.8),
-                    0 4px 8px rgba(0, 0, 0, 0.8);
-            }
-        }
-
-        /* Responsive stopwatch */
         @media (max-width: 600px) {
             #stopwatchTime {
-                font-size: 60px;
-                padding: 15px 30px;
+                font-size: 56px;
+                padding: 12px 24px;
             }
-        }
-
-        /* Helper text */
-        .helper-text {
-            font-size: 11px;
-            color: #666;
-            text-align: center;
-            margin-top: 8px;
-            line-height: 1.4;
-        }
-
-        /* Stopwatch controls */
-        #stopwatchControls {
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        #stopwatchControls.show {
-            display: flex;
-        }
-
-        .stopwatch-info {
-            background: rgba(76, 175, 80, 0.1);
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 3px solid #4CAF50;
-        }
-
-        .stopwatch-info h3 {
-            margin: 0;
-            font-size: 16px;
-        }
-
-        .stopwatch-info p {
-            margin: 0;
-        }
-
-        /* Toggle switch */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 28px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #333;
-            transition: .3s;
-            border-radius: 28px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-        }
-
-        .toggle-switch input:checked + .toggle-slider {
-            background-color: #4CAF50;
-        }
-
-        .toggle-switch input:checked + .toggle-slider:before {
-            transform: translateX(22px);
         }
 
         /* Save dialog */
@@ -695,7 +235,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             display: none;
             align-items: center;
             justify-content: center;
@@ -770,83 +310,350 @@
             color: white;
         }
 
-        .save-btn.primary:active {
-            background: #45a049;
-        }
-
         .save-btn.secondary {
             background: #333;
             color: white;
         }
 
-        .save-btn.secondary:active {
-            background: #444;
-        }
-
-        /* Saved videos list */
-        #savedVideosList {
+        /* Bottom controls - compact tabs */
+        #bottomBar {
+            background: rgba(0, 0, 0, 0.98);
+            border-top: 1px solid #222;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            max-height: 300px;
+            max-height: 50vh;
+        }
+
+        /* Tab navigation */
+        #tabNav {
+            display: flex;
+            background: #0a0a0a;
+            border-bottom: 1px solid #222;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 14px 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab:active {
+            background: #111;
+        }
+
+        .tab.active {
+            color: #4CAF50;
+            border-bottom-color: #4CAF50;
+        }
+
+        .tab .emoji {
+            display: block;
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        /* Tab content */
+        #tabContent {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom));
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Collapsible sections */
+        .collapsible {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .collapsible-header {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            user-select: none;
+        }
+
+        .collapsible-header:active {
+            background: #222;
+        }
+
+        .collapsible-icon {
+            transition: transform 0.3s;
+            font-size: 18px;
+        }
+
+        .collapsible.open .collapsible-icon {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s;
+            padding: 0 16px;
+        }
+
+        .collapsible.open .collapsible-content {
+            max-height: 400px;
+            padding: 0 16px 16px 16px;
             overflow-y: auto;
         }
 
-        .saved-video-item {
-            background: #1a1a1a;
+        /* Controls */
+        .control-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .control-row label {
+            font-size: 13px;
+            color: #888;
+            min-width: 80px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 32px;
+            background: transparent;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #4CAF50;
+            border-radius: 50%;
+            margin-top: -8px;
+        }
+
+        .value-display {
+            min-width: 45px;
+            text-align: right;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        select {
+            flex: 1;
+            padding: 10px;
+            background: #0a0a0a;
+            color: white;
+            border: 1px solid #333;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        /* Action buttons */
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .action-btn.primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .action-btn.danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .action-btn.secondary {
+            background: #333;
+            color: white;
+        }
+
+        /* Timeline */
+        #timeline {
+            position: relative;
+            height: 48px;
+            background: #0a0a0a;
+            border-radius: 6px;
+            overflow: visible;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        #timelineProgress {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50 0%, #66BB6A 100%);
+            width: 0%;
+            border-radius: 6px;
+        }
+
+        #timelineHandle {
+            position: absolute;
+            top: -4px;
+            left: 0;
+            width: 6px;
+            height: calc(100% + 8px);
+            background: white;
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+            cursor: grab;
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .playback-btn {
+            flex: 1;
+            padding: 12px;
+            background: #2a2a2a;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .playback-btn.primary {
+            background: #4CAF50;
+            font-size: 22px;
+        }
+
+        /* Saved videos list */
+        .video-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .video-item {
+            background: #0a0a0a;
             border: 1px solid #333;
             border-radius: 8px;
             padding: 12px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 12px;
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .saved-video-item:hover {
+        .video-item:active {
+            background: #1a1a1a;
             border-color: #4CAF50;
-            background: #222;
         }
 
-        .saved-video-item:active {
-            transform: scale(0.98);
+        .video-icon {
+            font-size: 24px;
+            flex-shrink: 0;
         }
 
         .video-info {
             flex: 1;
+            min-width: 0;
         }
 
         .video-name {
             font-weight: 600;
             margin-bottom: 4px;
-            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .video-details {
-            font-size: 12px;
+        .video-meta {
+            font-size: 11px;
             color: #666;
         }
 
         .video-time {
             color: #4CAF50;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 16px;
-            margin-right: 12px;
+            flex-shrink: 0;
         }
 
-        .delete-video-btn {
-            background: rgba(244, 67, 54, 0.2);
-            border: 1px solid rgba(244, 67, 54, 0.4);
-            color: #f44336;
-            padding: 6px 12px;
+        .video-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
             border-radius: 6px;
-            font-size: 12px;
             cursor: pointer;
+            font-size: 16px;
         }
 
-        .delete-video-btn:active {
-            background: rgba(244, 67, 54, 0.4);
+        .icon-btn:active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 32px 16px;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #aaa;
         }
     </style>
 </head>
@@ -860,25 +667,21 @@
             <video id="sourceVideo" playsinline webkit-playsinline muted></video>
             
             <div id="welcome">
-                <h1>🎥 Video Analyse Pro</h1>
-                <p><strong>Live Delay:</strong> Directe analyse met vertraging</p>
-                <p><strong>Opname:</strong> Frame-by-frame met teken-tools</p>
-                <p style="margin-top: 12px; font-size: 12px;">Perfect voor techniekanalyse in LO-lessen</p>
+                <h1>🎥 Sport Video Analyse</h1>
+                <p><strong>Live Delay:</strong> Directe feedback met vertraging</p>
+                <p><strong>Opname:</strong> Frame-by-frame analyse met teken-tools</p>
+                <p><strong>Stopwatch:</strong> Sprint tijden opnemen in video</p>
             </div>
 
-            <div id="statusBadge" class="buffering">Buffering 0%</div>
-
-            <!-- Stopwatch overlay -->
             <div id="stopwatchOverlay">
                 <div id="stopwatchTime">0.00</div>
             </div>
 
-            <!-- Save dialog -->
             <div id="saveDialog">
                 <div id="saveDialogContent">
-                    <h2>📹 Opname Opslaan</h2>
-                    <p class="save-info">Eindtijd: <strong id="finalTime">0.00s</strong></p>
-                    <input type="text" id="videoName" placeholder="Bijv: Sprint leerling 1" maxlength="50">
+                    <h2 id="saveDialogTitle">📹 Opname Opslaan</h2>
+                    <p class="save-info">Duur: <strong id="finalTime">0.00s</strong></p>
+                    <input type="text" id="videoName" placeholder="Geef een naam (optioneel)" maxlength="50">
                     <div class="save-buttons">
                         <button class="save-btn primary" onclick="saveVideo()">💾 Opslaan</button>
                         <button class="save-btn secondary" onclick="discardVideo()">🗑️ Verwijderen</button>
@@ -887,149 +690,175 @@
             </div>
 
             <div id="topBar">
-                <!-- Drawing tools -->
                 <div class="toolbar-row">
                     <button class="tool-btn active" data-tool="pen">✏️ Pen</button>
                     <button class="tool-btn" data-tool="line">📏 Lijn</button>
                     <button class="tool-btn" data-tool="arrow">➡️ Pijl</button>
                     <button class="tool-btn" data-tool="circle">⭕ Cirkel</button>
-                    <button class="tool-btn" data-tool="angle">📐 Hoek</button>
-                    <button class="tool-btn" data-tool="rect">▭ Rechthoek</button>
+                    <button class="tool-btn" data-tool="rect">▭ Kader</button>
                 </div>
                 
-                <!-- Colors & stroke -->
                 <div class="toolbar-row">
-                    <div class="color-picker">
-                        <div class="color-btn" data-color="#FF0000" style="background: #FF0000;"></div>
-                        <div class="color-btn active" data-color="#00FF00" style="background: #00FF00;"></div>
-                        <div class="color-btn" data-color="#0080FF" style="background: #0080FF;"></div>
-                        <div class="color-btn" data-color="#FFFF00" style="background: #FFFF00;"></div>
-                        <div class="color-btn" data-color="#FF00FF" style="background: #FF00FF;"></div>
-                        <div class="color-btn" data-color="#FFFFFF" style="background: #FFFFFF;"></div>
-                    </div>
+                    <div class="color-btn" data-color="#FF0000" style="background: #FF0000;"></div>
+                    <div class="color-btn active" data-color="#00FF00" style="background: #00FF00;"></div>
+                    <div class="color-btn" data-color="#0080FF" style="background: #0080FF;"></div>
+                    <div class="color-btn" data-color="#FFFF00" style="background: #FFFF00;"></div>
+                    <div class="color-btn" data-color="#FFFFFF" style="background: #FFFFFF;"></div>
                     
-                    <div class="stroke-width">
-                        <div class="stroke-btn" data-stroke="2">
-                            <div class="stroke-preview" style="width: 4px; height: 4px;"></div>
-                        </div>
-                        <div class="stroke-btn active" data-stroke="4">
-                            <div class="stroke-preview" style="width: 8px; height: 8px;"></div>
-                        </div>
-                        <div class="stroke-btn" data-stroke="6">
-                            <div class="stroke-preview" style="width: 12px; height: 12px;"></div>
-                        </div>
+                    <div class="stroke-btn" data-stroke="2">
+                        <div style="width: 4px; height: 4px; background: white; border-radius: 50%;"></div>
+                    </div>
+                    <div class="stroke-btn active" data-stroke="4">
+                        <div style="width: 8px; height: 8px; background: white; border-radius: 50%;"></div>
+                    </div>
+                    <div class="stroke-btn" data-stroke="6">
+                        <div style="width: 12px; height: 12px; background: white; border-radius: 50%;"></div>
                     </div>
 
-                    <button class="tool-btn" onclick="undoDrawing()" id="undoBtn" disabled>↶ Undo</button>
-                    <button class="tool-btn" onclick="redoDrawing()" id="redoBtn" disabled>↷ Redo</button>
-                    <button class="tool-btn danger" onclick="clearAllDrawings()">🗑️ Wis Alles</button>
+                    <button class="tool-btn" onclick="undoDrawing()" id="undoBtn" disabled>↶</button>
+                    <button class="tool-btn" onclick="redoDrawing()" id="redoBtn" disabled>↷</button>
+                    <button class="tool-btn" onclick="clearAllDrawings()" style="background: rgba(244,67,54,0.8);">🗑️</button>
                 </div>
             </div>
         </div>
 
         <div id="bottomBar">
-            <div id="modeSelector">
-                <button class="mode-btn active" data-mode="live">
+            <div id="tabNav">
+                <div class="tab active" data-tab="live">
                     <span class="emoji">⚡</span>
-                    Live Delay
-                </button>
-                <button class="mode-btn" data-mode="record">
+                    Live
+                </div>
+                <div class="tab" data-tab="record">
                     <span class="emoji">🎬</span>
                     Opname
-                </button>
-                <button class="mode-btn" data-mode="stopwatch">
+                </div>
+                <div class="tab" data-tab="stopwatch">
                     <span class="emoji">⏱️</span>
-                    Stopwatch
-                </button>
+                    Sprint
+                </div>
+                <div class="tab" data-tab="library">
+                    <span class="emoji">📚</span>
+                    Bibliotheek
+                </div>
             </div>
 
-            <div id="controlsContainer">
-                <!-- Live mode -->
-                <div id="liveControls" class="show">
+            <div id="tabContent">
+                <!-- Live Delay Tab -->
+                <div class="tab-pane active" id="liveTab">
+                    <div class="info-box">
+                        ⚡ <strong>Live Delay</strong> - Perfecte voor directe feedback tijdens oefeningen
+                    </div>
+
                     <div class="control-row">
                         <label>Vertraging:</label>
                         <input type="range" id="delaySlider" min="2" max="10" value="5" step="1">
                         <span class="value-display"><span id="delayValue">5</span>s</span>
                     </div>
+
                     <div class="control-row">
                         <label>Snelheid:</label>
                         <input type="range" id="speedSlider" min="25" max="100" value="100" step="25">
                         <span class="value-display"><span id="speedValue">100</span>%</span>
                     </div>
-                </div>
 
-                <!-- Playback mode -->
-                <div id="playbackControls">
-                    <!-- Saved recordings for record mode -->
-                    <div id="savedRecordingsSection" style="display: none; margin-bottom: 12px;">
-                        <h4 style="color: #4CAF50; margin-bottom: 12px; font-size: 14px;">📚 Opgeslagen Opnames</h4>
-                        <div id="savedRecordingsList"></div>
-                    </div>
-
-                    <div id="timelineContainer">
-                        <div id="timeline">
-                            <div id="timelineProgress"></div>
-                            <div id="timelineHandle"></div>
-                        </div>
-                        <div id="frameInfo">
-                            <span><strong id="currentTime">0.0s</strong> / <span id="totalTime">0.0s</span></span>
-                        </div>
-                    </div>
-
-                    <button class="video-control-btn" id="playPauseBtn" onclick="togglePlayPause()">
-                        <span style="font-size: 32px;">▶️</span>
-                        <span>Afspelen</span>
+                    <button class="action-btn primary" id="liveBtn" onclick="startMode('live')">
+                        <span>▶️</span>
+                        <span>Start Live Delay</span>
                     </button>
-
-                    <div id="speedControl">
-                        <div class="control-row">
-                            <label>Snelheid:</label>
-                            <input type="range" id="playbackSpeed" min="25" max="200" value="50" step="25">
-                            <span class="value-display"><span id="playbackSpeedValue">50</span>%</span>
-                        </div>
-                    </div>
-
-                    <div class="control-row" style="background: #1a1a1a; padding: 10px; border-radius: 8px;">
-                        <label style="flex: 1;">Herhaal automatisch:</label>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="loopPlayback" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-
-                    <p class="helper-text">💡 Tip: Sleep de witte balk om heen en weer te spoelen</p>
                 </div>
 
-                <!-- Stopwatch mode -->
-                <div id="stopwatchControls">
-                    <div class="stopwatch-info">
-                        <h3 style="color: #4CAF50; margin-bottom: 8px;">⏱️ Video Stopwatch</h3>
-                        <p style="font-size: 13px; color: #888; line-height: 1.5;">
-                            Perfect voor sprint tijden! De tijd wordt opgenomen in de video.
-                        </p>
+                <!-- Record Tab -->
+                <div class="tab-pane" id="recordTab">
+                    <div class="info-box">
+                        🎬 <strong>Opname</strong> - Frame-by-frame analyse met tekenhulpmiddelen
                     </div>
-                    
+
+                    <button class="action-btn primary" id="recordBtn" onclick="startMode('record')">
+                        <span>⏺️</span>
+                        <span>Start Opname</span>
+                    </button>
+                </div>
+
+                <!-- Stopwatch Tab -->
+                <div class="tab-pane" id="stopwatchTab">
+                    <div class="info-box">
+                        ⏱️ <strong>Video Stopwatch</strong> - Sprint tijden opnemen in de video
+                    </div>
+
                     <div class="control-row">
-                        <label>Positie:</label>
-                        <select id="stopwatchPosition" style="flex: 1; padding: 10px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 8px; font-size: 14px;">
+                        <label>Tijd positie:</label>
+                        <select id="stopwatchPosition">
                             <option value="bottom">Onderaan</option>
                             <option value="top">Bovenaan</option>
                         </select>
                     </div>
 
-                    <!-- Saved videos -->
-                    <div id="savedVideosSection" style="display: none;">
-                        <h4 style="color: #4CAF50; margin-bottom: 12px; font-size: 14px;">📚 Opgeslagen Video's</h4>
-                        <div id="savedVideosList"></div>
-                    </div>
-
-                    <p class="helper-text">💡 Druk op START om te beginnen filmen. De stopwatch start automatisch mee!</p>
+                    <button class="action-btn primary" id="stopwatchBtn" onclick="startMode('stopwatch')">
+                        <span>⏱️</span>
+                        <span>Start Stopwatch</span>
+                    </button>
                 </div>
 
-                <button id="mainButton">
-                    <span id="buttonIcon">▶️</span>
-                    <span id="buttonText">Start Live Delay</span>
-                </button>
+                <!-- Library Tab -->
+                <div class="tab-pane" id="libraryTab">
+                    <div class="collapsible open">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <span>🎬 Opnames (<span id="recordingsCount">0</span>)</span>
+                            <span class="collapsible-icon">▼</span>
+                        </div>
+                        <div class="collapsible-content">
+                            <div id="recordingsList" class="video-list">
+                                <div class="empty-state">Nog geen opnames</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="collapsible open">
+                        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                            <span>⏱️ Sprint Video's (<span id="stopwatchCount">0</span>)</span>
+                            <span class="collapsible-icon">▼</span>
+                        </div>
+                        <div class="collapsible-content">
+                            <div id="stopwatchList" class="video-list">
+                                <div class="empty-state">Nog geen sprint video's</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Playback Tab (shown after recording) -->
+                <div class="tab-pane" id="playbackTab">
+                    <div id="timeline">
+                        <div id="timelineProgress"></div>
+                        <div id="timelineHandle"></div>
+                    </div>
+
+                    <div style="text-align: center; font-size: 14px; color: #888; margin-bottom: 12px;">
+                        <span id="currentTime">0.0s</span> / <span id="totalTime">0.0s</span>
+                    </div>
+
+                    <div class="playback-controls">
+                        <button class="playback-btn" onclick="jumpToStart()">⏮️</button>
+                        <button class="playback-btn primary" id="playPauseBtn" onclick="togglePlayPause()">▶️</button>
+                        <button class="playback-btn" onclick="jumpToEnd()">⏭️</button>
+                    </div>
+
+                    <div class="control-row">
+                        <label>Snelheid:</label>
+                        <input type="range" id="playbackSpeed" min="25" max="200" value="50" step="25">
+                        <span class="value-display"><span id="playbackSpeedValue">50</span>%</span>
+                    </div>
+
+                    <button class="action-btn primary" onclick="downloadVideo()" style="margin-bottom: 8px;">
+                        <span>💾</span>
+                        <span>Download Video</span>
+                    </button>
+
+                    <button class="action-btn secondary" onclick="closePlayback()">
+                        <span>✕</span>
+                        <span>Sluiten</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1039,32 +868,16 @@
         const sourceVideo = document.getElementById('sourceVideo');
         const displayCanvas = document.getElementById('displayCanvas');
         const drawCanvas = document.getElementById('drawCanvas');
-        const displayCtx = displayCanvas.getContext('2d', { willReadFrequently: false });
-        const drawCtx = drawCanvas.getContext('2d', { willReadFrequently: false });
+        const displayCtx = displayCanvas.getContext('2d');
+        const drawCtx = drawCanvas.getContext('2d');
         const welcome = document.getElementById('welcome');
         const topBar = document.getElementById('topBar');
-        const statusBadge = document.getElementById('statusBadge');
-        const mainButton = document.getElementById('mainButton');
-        const buttonIcon = document.getElementById('buttonIcon');
-        const buttonText = document.getElementById('buttonText');
-        const canvasWrapper = document.getElementById('canvasWrapper');
-
-        // Mode controls
-        const liveControls = document.getElementById('liveControls');
-        const playbackControls = document.getElementById('playbackControls');
-        const stopwatchControls = document.getElementById('stopwatchControls');
         const stopwatchOverlay = document.getElementById('stopwatchOverlay');
         const stopwatchTime = document.getElementById('stopwatchTime');
-        const stopwatchPosition = document.getElementById('stopwatchPosition');
-
-        // Sliders
-        const delaySlider = document.getElementById('delaySlider');
-        const delayValue = document.getElementById('delayValue');
-        const speedSlider = document.getElementById('speedSlider');
-        const speedValue = document.getElementById('speedValue');
+        const canvasWrapper = document.getElementById('canvasWrapper');
 
         // State
-        let currentMode = 'live';
+        let currentMode = null;
         let isRunning = false;
         let stream = null;
         let frames = [];
@@ -1074,7 +887,7 @@
         let currentFrameIndex = 0;
         let isPlaying = false;
         
-        // Drawing state
+        // Drawing
         let drawings = [];
         let undoStack = [];
         let currentTool = 'pen';
@@ -1084,23 +897,41 @@
         let drawStart = null;
         let penPath = [];
 
-        // Stopwatch state
-        let stopwatchStartTime = 0;
+        // Stopwatch
+        let stopwatchStartTime = null;
         let stopwatchElapsed = 0;
-        let stopwatchInterval = null;
+        
+        // Library
         let savedVideos = [];
         let currentVideoFrames = null;
 
-        // Update sliders
-        delaySlider.oninput = () => {
-            const val = parseInt(delaySlider.value);
-            delayValue.textContent = val;
+        // Tab navigation
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.onclick = () => {
+                if (isRunning) return; // Don't allow tab switching during recording
+                
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + 'Tab').classList.add('active');
+            };
+        });
+
+        // Collapsible sections
+        function toggleCollapsible(header) {
+            header.parentElement.classList.toggle('open');
+        }
+
+        // Sliders
+        document.getElementById('delaySlider').oninput = (e) => {
+            const val = parseInt(e.target.value);
+            document.getElementById('delayValue').textContent = val;
             maxFrames = val * 30;
         };
 
-        speedSlider.oninput = () => {
-            const val = parseInt(speedSlider.value);
-            speedValue.textContent = val;
+        document.getElementById('speedSlider').oninput = (e) => {
+            document.getElementById('speedValue').textContent = e.target.value;
         };
 
         document.getElementById('playbackSpeed').oninput = (e) => {
@@ -1109,71 +940,17 @@
             playbackSpeed = val;
         };
 
-        // Stopwatch position
-        stopwatchPosition.onchange = () => {
-            if (stopwatchPosition.value === 'top') {
-                stopwatchOverlay.style.bottom = 'auto';
-                stopwatchOverlay.style.top = '80px';
-            } else {
-                stopwatchOverlay.style.top = 'auto';
-                stopwatchOverlay.style.bottom = '80px';
-            }
+        document.getElementById('stopwatchPosition').onchange = () => {
+            const pos = document.getElementById('stopwatchPosition').value;
+            stopwatchOverlay.style.top = pos === 'top' ? '80px' : 'auto';
+            stopwatchOverlay.style.bottom = pos === 'bottom' ? '100px' : 'auto';
         };
 
-        // Mode selector
-        document.querySelectorAll('.mode-btn').forEach(btn => {
-            btn.onclick = () => {
-                if (isRunning) {
-                    alert('Stop eerst de huidige modus');
-                    return;
-                }
-
-                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                currentMode = btn.dataset.mode;
-                updateUIForMode();
-            };
-        });
-
-        function updateUIForMode() {
-            liveControls.classList.remove('show');
-            playbackControls.classList.remove('show');
-            stopwatchControls.classList.remove('show');
-
-            switch(currentMode) {
-                case 'live':
-                    liveControls.classList.add('show');
-                    buttonIcon.textContent = '▶️';
-                    buttonText.textContent = 'Start Live Delay';
-                    break;
-                case 'record':
-                    liveControls.classList.add('show');
-                    buttonIcon.textContent = '⏺️';
-                    buttonText.textContent = 'Start Opname';
-                    break;
-                case 'stopwatch':
-                    stopwatchControls.classList.add('show');
-                    buttonIcon.textContent = '⏱️';
-                    buttonText.textContent = 'Start Stopwatch';
-                    break;
-            }
-        }
-
-        // Main button
-        mainButton.onclick = async () => {
-            console.log('Main button clicked, isRunning:', isRunning, 'currentMode:', currentMode);
-            if (isRunning) {
-                stop();
-            } else {
-                start();
-            }
-        };
-
-        async function start() {
-            console.log('Start function called, currentMode:', currentMode);
+        // Start recording
+        async function startMode(mode) {
+            currentMode = mode;
+            
             try {
-                console.log('Requesting camera access...');
                 stream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: 'environment',
@@ -1182,76 +959,45 @@
                     },
                     audio: false
                 });
-                console.log('Camera access granted');
 
                 sourceVideo.srcObject = stream;
                 await sourceVideo.play();
-                console.log('Video playing');
 
-                const width = sourceVideo.videoWidth;
-                const height = sourceVideo.videoHeight;
-                
-                displayCanvas.width = width;
-                displayCanvas.height = height;
-                drawCanvas.width = width;
-                drawCanvas.height = height;
-
-                // Size canvas wrapper to maintain aspect ratio
-                const aspectRatio = width / height;
-                const containerWidth = canvasWrapper.parentElement.clientWidth;
-                const containerHeight = canvasWrapper.parentElement.clientHeight;
-                
-                let displayWidth, displayHeight;
-                if (containerWidth / containerHeight > aspectRatio) {
-                    displayHeight = containerHeight;
-                    displayWidth = displayHeight * aspectRatio;
-                } else {
-                    displayWidth = containerWidth;
-                    displayHeight = displayWidth / aspectRatio;
-                }
-                
-                canvasWrapper.style.width = displayWidth + 'px';
-                canvasWrapper.style.height = displayHeight + 'px';
+                displayCanvas.width = sourceVideo.videoWidth;
+                displayCanvas.height = sourceVideo.videoHeight;
+                drawCanvas.width = sourceVideo.videoWidth;
+                drawCanvas.height = sourceVideo.videoHeight;
 
                 frames = [];
                 drawings = [];
                 undoStack = [];
-                updateUndoRedoButtons();
                 isRunning = true;
                 welcome.classList.add('hidden');
-                
-                // Reset stopwatch mode flag
-                delete displayCanvas.dataset.stopwatchMode;
 
-                if (currentMode === 'live') {
-                    statusBadge.classList.add('show', 'buffering');
-                    mainButton.classList.add('recording');
-                    buttonIcon.textContent = '⏹️';
-                    buttonText.textContent = 'Stop';
-                    captureLiveLoop();
-                } else if (currentMode === 'record') {
+                // Update button
+                const btn = document.getElementById(mode + 'Btn');
+                btn.classList.remove('primary');
+                btn.classList.add('danger');
+                btn.innerHTML = '<span>⏹️</span><span>Stop</span>';
+                btn.onclick = () => stopMode();
+
+                if (mode === 'record') {
                     topBar.classList.add('show');
-                    mainButton.classList.add('recording');
-                    buttonIcon.textContent = '⏹️';
-                    buttonText.textContent = 'Stop Opname';
-                    captureRecordLoop();
-                } else if (currentMode === 'stopwatch') {
+                    captureLoop();
+                } else if (mode === 'stopwatch') {
                     stopwatchOverlay.classList.add('show');
-                    stopwatchTime.classList.add('running');
-                    mainButton.classList.add('recording');
-                    buttonIcon.textContent = '⏹️';
-                    buttonText.textContent = 'Stop Stopwatch';
                     startStopwatch();
                     captureStopwatchLoop();
+                } else {
+                    captureLoop();
                 }
 
             } catch (err) {
-                console.error('Camera error:', err);
-                alert('Camera fout: ' + err.message + '\n\nCheck console voor details');
+                alert('Camera fout: ' + err.message);
             }
         }
 
-        function stop() {
+        function stopMode() {
             isRunning = false;
 
             if (animationId) {
@@ -1267,84 +1013,69 @@
             sourceVideo.srcObject = null;
 
             if (currentMode === 'live') {
+                // Just reset for live mode
                 frames = [];
-                displayCtx.clearRect(0, 0, displayCanvas.width, displayCanvas.height);
-                drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
                 welcome.classList.remove('hidden');
-                statusBadge.classList.remove('show');
-                topBar.classList.remove('show');
-            } else if (currentMode === 'record') {
-                // Show save dialog for record mode too
-                topBar.classList.remove('show');
-                showSaveDialogRecord();
-            } else if (currentMode === 'stopwatch') {
-                // Stop stopwatch and show save options
-                stopStopwatch();
-                stopwatchOverlay.classList.remove('show');
-                stopwatchTime.classList.remove('running');
+                resetButton('live');
+            } else {
+                // Show save dialog for record/stopwatch
+                if (currentMode === 'stopwatch') {
+                    stopStopwatch();
+                    stopwatchOverlay.classList.remove('show');
+                }
                 
-                // Set a flag so displayFrame knows not to call redrawAnnotations
-                displayCanvas.dataset.stopwatchMode = 'true';
+                if (currentMode === 'record') {
+                    topBar.classList.remove('show');
+                }
                 
-                // Show save dialog
                 showSaveDialog();
             }
-
-            mainButton.classList.remove('recording');
-            updateUIForMode();
         }
 
-        function captureLiveLoop() {
+        function resetButton(mode) {
+            const btn = document.getElementById(mode + 'Btn');
+            btn.classList.remove('danger');
+            btn.classList.add('primary');
+            
+            const icons = { live: '▶️', record: '⏺️', stopwatch: '⏱️' };
+            const texts = { live: 'Start Live Delay', record: 'Start Opname', stopwatch: 'Start Stopwatch' };
+            
+            btn.innerHTML = `<span>${icons[mode]}</span><span>${texts[mode]}</span>`;
+            btn.onclick = () => startMode(mode);
+        }
+
+        // Capture loops
+        function captureLoop() {
             if (!isRunning) return;
 
             displayCtx.drawImage(sourceVideo, 0, 0);
-            const frame = displayCtx.getImageData(0, 0, displayCanvas.width, displayCanvas.height);
-            frames.push(frame);
+            
+            if (currentMode === 'live') {
+                const frame = displayCtx.getImageData(0, 0, displayCanvas.width, displayCanvas.height);
+                frames.push(frame);
 
-            if (frames.length > maxFrames) {
-                frames.shift();
+                if (frames.length > maxFrames) frames.shift();
+
+                if (frames.length >= maxFrames) {
+                    displayCtx.putImageData(frames[0], 0, 0);
+                }
+            } else if (currentMode === 'record') {
+                const frame = displayCtx.getImageData(0, 0, displayCanvas.width, displayCanvas.height);
+                frames.push(frame);
             }
 
-            const progress = Math.round((frames.length / maxFrames) * 100);
-            statusBadge.textContent = frames.length >= maxFrames ? 
-                `Live ${delaySlider.value}s` : `Buffering ${progress}%`;
-
-            if (frames.length >= maxFrames) {
-                statusBadge.classList.remove('buffering');
-                displayCtx.putImageData(frames[0], 0, 0);
-            } else {
-                displayCtx.putImageData(frame, 0, 0);
-            }
-
-            const speed = parseInt(speedSlider.value) / 100;
-            const delay = 1000 / (30 * speed);
+            const speed = currentMode === 'live' ? parseInt(document.getElementById('speedSlider').value) / 100 : 1;
             setTimeout(() => {
-                animationId = requestAnimationFrame(captureLiveLoop);
-            }, delay);
-        }
-
-        function captureRecordLoop() {
-            if (!isRunning) return;
-
-            displayCtx.drawImage(sourceVideo, 0, 0);
-            const frame = displayCtx.getImageData(0, 0, displayCanvas.width, displayCanvas.height);
-            frames.push(frame);
-
-            setTimeout(() => {
-                animationId = requestAnimationFrame(captureRecordLoop);
-            }, 1000 / 30);
+                animationId = requestAnimationFrame(captureLoop);
+            }, 1000 / (30 * speed));
         }
 
         function captureStopwatchLoop() {
             if (!isRunning) return;
 
-            // Draw video frame
             displayCtx.drawImage(sourceVideo, 0, 0);
-            
-            // Draw stopwatch on video
             drawStopwatchOnCanvas();
             
-            // Capture the combined frame
             const frame = displayCtx.getImageData(0, 0, displayCanvas.width, displayCanvas.height);
             frames.push(frame);
 
@@ -1353,120 +1084,138 @@
             }, 1000 / 30);
         }
 
+        // Stopwatch
         function startStopwatch() {
-            stopwatchStartTime = null; // Will be set on first frame
+            stopwatchStartTime = null;
             stopwatchElapsed = 0;
-            updateStopwatchDisplay();
+            stopwatchTime.textContent = '0.00';
         }
 
         function stopStopwatch() {
-            // Timer stops automatically when recording stops
             stopwatchStartTime = null;
         }
 
-        function updateStopwatchDisplay() {
-            stopwatchTime.textContent = stopwatchElapsed.toFixed(2);
-        }
-
         function drawStopwatchOnCanvas() {
-            // Initialize start time on first frame
-            if (stopwatchStartTime === null) {
-                stopwatchStartTime = Date.now();
-            }
+            if (!stopwatchStartTime) stopwatchStartTime = Date.now();
             
-            // Calculate elapsed time
             stopwatchElapsed = (Date.now() - stopwatchStartTime) / 1000;
-            updateStopwatchDisplay();
+            stopwatchTime.textContent = stopwatchElapsed.toFixed(2);
             
-            const fontSize = displayCanvas.height * 0.15; // 15% of canvas height
-            const padding = fontSize * 0.5;
+            const fontSize = displayCanvas.height * 0.12;
+            const text = stopwatchElapsed.toFixed(2);
+            const pos = document.getElementById('stopwatchPosition').value;
             
             displayCtx.font = `bold ${fontSize}px "Courier New", monospace`;
             displayCtx.textAlign = 'center';
             displayCtx.textBaseline = 'middle';
             
-            const text = stopwatchElapsed.toFixed(2);
-            const textWidth = displayCtx.measureText(text).width;
-            
-            // Position
             const x = displayCanvas.width / 2;
-            let y;
-            if (stopwatchPosition.value === 'top') {
-                y = padding + fontSize / 2;
-            } else {
-                y = displayCanvas.height - padding - fontSize / 2;
-            }
+            const y = pos === 'top' ? fontSize : displayCanvas.height - fontSize;
             
-            // Background
-            displayCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            displayCtx.fillRect(
-                x - textWidth / 2 - padding,
-                y - fontSize / 2 - padding / 2,
-                textWidth + padding * 2,
-                fontSize + padding
-            );
-            
-            // Border
-            displayCtx.strokeStyle = 'rgba(0, 255, 0, 0.3)';
-            displayCtx.lineWidth = 2;
-            displayCtx.strokeRect(
-                x - textWidth / 2 - padding,
-                y - fontSize / 2 - padding / 2,
-                textWidth + padding * 2,
-                fontSize + padding
-            );
-            
-            // Glow effect
             displayCtx.shadowColor = '#00FF00';
             displayCtx.shadowBlur = 20;
-            
-            // Text
             displayCtx.fillStyle = '#00FF00';
             displayCtx.fillText(text, x, y);
-            
-            // Reset shadow
             displayCtx.shadowBlur = 0;
         }
 
-        // Playback functions
-        function togglePlayPause() {
-            isPlaying = !isPlaying;
-            const btn = document.getElementById('playPauseBtn');
+        // Save dialog
+        function showSaveDialog() {
+            const mode = currentMode;
+            const title = mode === 'stopwatch' ? '⏱️ Sprint Opslaan' : '🎬 Opname Opslaan';
+            const time = mode === 'stopwatch' ? 
+                stopwatchElapsed.toFixed(2) + 's' : 
+                (frames.length / 30).toFixed(1) + 's';
             
-            if (isPlaying) {
-                btn.innerHTML = '<span style="font-size: 32px;">⏸️</span><span>Pauzeren</span>';
-                btn.classList.add('playing');
-                playLoop();
-            } else {
-                btn.innerHTML = '<span style="font-size: 32px;">▶️</span><span>Afspelen</span>';
-                btn.classList.remove('playing');
+            document.getElementById('saveDialogTitle').textContent = title;
+            document.getElementById('finalTime').textContent = time;
+            document.getElementById('videoName').value = '';
+            document.getElementById('saveDialog').classList.add('show');
+            
+            setTimeout(() => document.getElementById('videoName').focus(), 100);
+        }
+
+        function saveVideo() {
+            const defaultName = currentMode === 'stopwatch' ? 'Sprint' : 'Opname';
+            const name = document.getElementById('videoName').value.trim() || 
+                defaultName + ' ' + (savedVideos.length + 1);
+            
+            const video = {
+                id: Date.now(),
+                name: name,
+                time: currentMode === 'stopwatch' ? 
+                    stopwatchElapsed.toFixed(2) : 
+                    (frames.length / 30).toFixed(1),
+                date: new Date().toLocaleString('nl-NL', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                frames: frames.length,
+                mode: currentMode
+            };
+            
+            savedVideos.push(video);
+            localStorage.setItem('savedVideos', JSON.stringify(savedVideos));
+            
+            currentVideoFrames = [...frames];
+            
+            document.getElementById('saveDialog').classList.remove('show');
+            updateLibrary();
+            openPlayback();
+        }
+
+        function discardVideo() {
+            if (confirm('Weet je zeker dat je deze opname wilt verwijderen?')) {
+                frames = [];
+                currentVideoFrames = null;
+                document.getElementById('saveDialog').classList.remove('show');
+                welcome.classList.remove('hidden');
+                resetButton(currentMode);
             }
         }
 
-        function playLoop() {
-            if (!isPlaying) return;
+        // Playback
+        function openPlayback() {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById('playbackTab').classList.add('active');
             
-            if (currentFrameIndex >= frames.length - 1) {
-                // Check if loop is enabled
-                const loopEnabled = document.getElementById('loopPlayback')?.checked;
-                
-                if (loopEnabled && displayCanvas.dataset.stopwatchMode === 'true') {
-                    // Loop back to start for stopwatch replays
-                    currentFrameIndex = 0;
-                    displayFrame(currentFrameIndex);
-                    updatePlaybackUI();
-                    
-                    // Continue playing
-                    setTimeout(() => {
-                        requestAnimationFrame(playLoop);
-                    }, 1000 / (30 * (playbackSpeed / 100)));
-                } else {
-                    // Stop at end
-                    isPlaying = false;
-                    const btn = document.getElementById('playPauseBtn');
-                    btn.innerHTML = '<span style="font-size: 32px;">▶️</span><span>Afspelen</span>';
-                    btn.classList.remove('playing');
-                }
+            if (currentMode === 'record') {
+                topBar.classList.add('show');
+            }
+            
+            currentFrameIndex = 0;
+            displayFrame(0);
+            updatePlaybackUI();
+        }
+
+        function closePlayback() {
+            topBar.classList.remove('show');
+            isPlaying = false;
+            
+            document.getElementById('playbackTab').classList.remove('active');
+            document.querySelector('.tab[data-tab="library"]').classList.add('active');
+            document.getElementById('libraryTab').classList.add('active');
+            
+            displayCtx.clearRect(0, 0, displayCanvas.width, displayCanvas.height);
+            drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+            
+            resetButton(currentMode);
+        }
+
+        function togglePlayPause() {
+            isPlaying = !isPlaying;
+            document.getElementById('playPauseBtn').textContent = isPlaying ? '⏸️' : '▶️';
+            if (isPlaying) playLoop();
+        }
+
+        function playLoop() {
+            if (!isPlaying || currentFrameIndex >= frames.length - 1) {
+                isPlaying = false;
+                document.getElementById('playPauseBtn').textContent = '▶️';
                 return;
             }
 
@@ -1474,20 +1223,29 @@
             displayFrame(currentFrameIndex);
             updatePlaybackUI();
 
-            setTimeout(() => {
-                requestAnimationFrame(playLoop);
-            }, 1000 / (30 * (playbackSpeed / 100)));
+            setTimeout(() => requestAnimationFrame(playLoop), 1000 / (30 * (playbackSpeed / 100)));
+        }
+
+        function jumpToStart() {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶️';
+            currentFrameIndex = 0;
+            displayFrame(0);
+            updatePlaybackUI();
+        }
+
+        function jumpToEnd() {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶️';
+            currentFrameIndex = frames.length - 1;
+            displayFrame(currentFrameIndex);
+            updatePlaybackUI();
         }
 
         function displayFrame(index) {
             if (frames[index]) {
                 displayCtx.putImageData(frames[index], 0, 0);
-                
-                // Only redraw annotations for record mode
-                // Stopwatch frames already have the timer burned in
-                if (displayCanvas.dataset.stopwatchMode !== 'true') {
-                    redrawAnnotations();
-                }
+                if (currentMode === 'record') redrawAnnotations();
             }
         }
 
@@ -1495,26 +1253,23 @@
             const progress = (currentFrameIndex / Math.max(1, frames.length - 1)) * 100;
             document.getElementById('timelineProgress').style.width = progress + '%';
             document.getElementById('timelineHandle').style.left = progress + '%';
-            document.getElementById('currentTime').textContent = `${(currentFrameIndex / 30).toFixed(1)}s`;
-            document.getElementById('totalTime').textContent = `${((frames.length - 1) / 30).toFixed(1)}s`;
+            document.getElementById('currentTime').textContent = (currentFrameIndex / 30).toFixed(1) + 's';
+            document.getElementById('totalTime').textContent = ((frames.length - 1) / 30).toFixed(1) + 's';
         }
 
-        // Timeline interaction
-        let isDraggingTimeline = false;
-
+        // Timeline scrubbing
+        let isDragging = false;
         document.getElementById('timeline').addEventListener('pointerdown', (e) => {
-            isDraggingTimeline = true;
+            isDragging = true;
             seekTimeline(e);
         });
 
         document.addEventListener('pointermove', (e) => {
-            if (isDraggingTimeline) {
-                seekTimeline(e);
-            }
+            if (isDragging) seekTimeline(e);
         });
 
         document.addEventListener('pointerup', () => {
-            isDraggingTimeline = false;
+            isDragging = false;
         });
 
         function seekTimeline(e) {
@@ -1523,16 +1278,114 @@
             const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
             currentFrameIndex = Math.floor(percent * Math.max(0, frames.length - 1));
             
-            // Pause when scrubbing
-            if (isPlaying) {
-                isPlaying = false;
-                const btn = document.getElementById('playPauseBtn');
-                btn.innerHTML = '<span style="font-size: 32px;">▶️</span><span>Afspelen</span>';
-                btn.classList.remove('playing');
-            }
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶️';
             
             displayFrame(currentFrameIndex);
             updatePlaybackUI();
+        }
+
+        // Download video
+        async function downloadVideo() {
+            if (frames.length === 0) return;
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = displayCanvas.width;
+            canvas.height = displayCanvas.height;
+            const ctx = canvas.getContext('2d');
+            
+            // Create video blob
+            const stream = canvas.captureStream(30);
+            const mediaRecorder = new MediaRecorder(stream, {
+                mimeType: 'video/webm;codecs=vp9',
+                videoBitsPerSecond: 5000000
+            });
+            
+            const chunks = [];
+            mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+            
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'sport-analyse-' + Date.now() + '.webm';
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+            
+            mediaRecorder.start();
+            
+            // Draw all frames
+            for (let i = 0; i < frames.length; i++) {
+                ctx.putImageData(frames[i], 0);
+                if (currentMode === 'record' && drawings.length > 0) {
+                    // Draw annotations on this canvas too
+                    drawings.forEach(d => drawAnnotationOnContext(ctx, d));
+                }
+                await new Promise(resolve => setTimeout(resolve, 33)); // ~30fps
+            }
+            
+            mediaRecorder.stop();
+        }
+
+        function drawAnnotationOnContext(ctx, drawing) {
+            ctx.strokeStyle = drawing.color;
+            ctx.lineWidth = drawing.width;
+            ctx.lineCap = 'round';
+
+            switch(drawing.type) {
+                case 'pen':
+                    if (drawing.path.length < 2) break;
+                    ctx.beginPath();
+                    ctx.moveTo(drawing.path[0].x, drawing.path[0].y);
+                    for (let i = 1; i < drawing.path.length; i++) {
+                        ctx.lineTo(drawing.path[i].x, drawing.path[i].y);
+                    }
+                    ctx.stroke();
+                    break;
+                case 'line':
+                    ctx.beginPath();
+                    ctx.moveTo(drawing.x1, drawing.y1);
+                    ctx.lineTo(drawing.x2, drawing.y2);
+                    ctx.stroke();
+                    break;
+                case 'arrow':
+                    const angle = Math.atan2(drawing.y2 - drawing.y1, drawing.x2 - drawing.x1);
+                    const headLength = drawing.width * 5;
+                    ctx.beginPath();
+                    ctx.moveTo(drawing.x1, drawing.y1);
+                    ctx.lineTo(drawing.x2, drawing.y2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(drawing.x2, drawing.y2);
+                    ctx.lineTo(
+                        drawing.x2 - headLength * Math.cos(angle - Math.PI / 6),
+                        drawing.y2 - headLength * Math.sin(angle - Math.PI / 6)
+                    );
+                    ctx.lineTo(
+                        drawing.x2 - headLength * Math.cos(angle + Math.PI / 6),
+                        drawing.y2 - headLength * Math.sin(angle + Math.PI / 6)
+                    );
+                    ctx.lineTo(drawing.x2, drawing.y2);
+                    ctx.fillStyle = drawing.color;
+                    ctx.fill();
+                    break;
+                case 'circle':
+                    const radius = Math.sqrt(
+                        Math.pow(drawing.x2 - drawing.x1, 2) + 
+                        Math.pow(drawing.y2 - drawing.y1, 2)
+                    );
+                    ctx.beginPath();
+                    ctx.arc(drawing.x1, drawing.y1, radius, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    break;
+                case 'rect':
+                    ctx.beginPath();
+                    ctx.rect(drawing.x1, drawing.y1, drawing.x2 - drawing.x1, drawing.y2 - drawing.y1);
+                    ctx.stroke();
+                    break;
+            }
         }
 
         // Drawing tools
@@ -1561,7 +1414,7 @@
         });
 
         function clearAllDrawings() {
-            if (confirm('Weet je zeker dat je alle tekeningen wilt wissen?')) {
+            if (confirm('Alle tekeningen wissen?')) {
                 undoStack.push([...drawings]);
                 drawings = [];
                 updateUndoRedoButtons();
@@ -1594,7 +1447,6 @@
         drawCanvas.addEventListener('pointerdown', startDrawing);
         drawCanvas.addEventListener('pointermove', draw);
         drawCanvas.addEventListener('pointerup', stopDrawing);
-        drawCanvas.addEventListener('pointercancel', stopDrawing);
 
         function getCanvasCoords(e) {
             const rect = drawCanvas.getBoundingClientRect();
@@ -1611,7 +1463,7 @@
             isDrawing = true;
             drawStart = getCanvasCoords(e);
             penPath = [drawStart];
-            undoStack = []; // Clear redo stack on new drawing
+            undoStack = [];
         }
 
         function draw(e) {
@@ -1666,7 +1518,6 @@
             drawCtx.strokeStyle = currentColor;
             drawCtx.lineWidth = strokeWidth;
             drawCtx.lineCap = 'round';
-            drawCtx.lineJoin = 'round';
             
             drawCtx.beginPath();
             drawCtx.moveTo(path[0].x, path[0].y);
@@ -1705,83 +1556,12 @@
                     drawCtx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
                     drawCtx.stroke();
                     break;
-                case 'angle':
-                    // Draw angle with three points (start, middle auto-calculated, end)
-                    const midX = (start.x + end.x) / 2;
-                    const midY = start.y;
-                    drawCtx.beginPath();
-                    drawCtx.moveTo(start.x, start.y);
-                    drawCtx.lineTo(midX, midY);
-                    drawCtx.lineTo(end.x, end.y);
-                    drawCtx.stroke();
-                    
-                    // Draw angle arc
-                    const angle = Math.atan2(end.y - midY, end.x - midX);
-                    drawCtx.beginPath();
-                    drawCtx.arc(midX, midY, 30, Math.PI, angle, false);
-                    drawCtx.stroke();
-                    break;
             }
         }
 
         function redrawAnnotations() {
             drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-            
-            drawings.forEach(drawing => {
-                drawCtx.strokeStyle = drawing.color;
-                drawCtx.lineWidth = drawing.width;
-                drawCtx.lineCap = 'round';
-                drawCtx.lineJoin = 'round';
-
-                switch(drawing.type) {
-                    case 'pen':
-                        if (drawing.path.length < 2) break;
-                        drawCtx.beginPath();
-                        drawCtx.moveTo(drawing.path[0].x, drawing.path[0].y);
-                        for (let i = 1; i < drawing.path.length; i++) {
-                            drawCtx.lineTo(drawing.path[i].x, drawing.path[i].y);
-                        }
-                        drawCtx.stroke();
-                        break;
-                    case 'line':
-                        drawCtx.beginPath();
-                        drawCtx.moveTo(drawing.x1, drawing.y1);
-                        drawCtx.lineTo(drawing.x2, drawing.y2);
-                        drawCtx.stroke();
-                        break;
-                    case 'arrow':
-                        drawArrow(drawing.x1, drawing.y1, drawing.x2, drawing.y2);
-                        break;
-                    case 'circle':
-                        const radius = Math.sqrt(
-                            Math.pow(drawing.x2 - drawing.x1, 2) + 
-                            Math.pow(drawing.y2 - drawing.y1, 2)
-                        );
-                        drawCtx.beginPath();
-                        drawCtx.arc(drawing.x1, drawing.y1, radius, 0, 2 * Math.PI);
-                        drawCtx.stroke();
-                        break;
-                    case 'rect':
-                        drawCtx.beginPath();
-                        drawCtx.rect(drawing.x1, drawing.y1, drawing.x2 - drawing.x1, drawing.y2 - drawing.y1);
-                        drawCtx.stroke();
-                        break;
-                    case 'angle':
-                        const midX = (drawing.x1 + drawing.x2) / 2;
-                        const midY = drawing.y1;
-                        drawCtx.beginPath();
-                        drawCtx.moveTo(drawing.x1, drawing.y1);
-                        drawCtx.lineTo(midX, midY);
-                        drawCtx.lineTo(drawing.x2, drawing.y2);
-                        drawCtx.stroke();
-                        
-                        const angle = Math.atan2(drawing.y2 - midY, drawing.x2 - midX);
-                        drawCtx.beginPath();
-                        drawCtx.arc(midX, midY, 30, Math.PI, angle, false);
-                        drawCtx.stroke();
-                        break;
-                }
-            });
+            drawings.forEach(drawing => drawAnnotationOnContext(drawCtx, drawing));
         }
 
         function drawArrow(x1, y1, x2, y2) {
@@ -1808,189 +1588,65 @@
             drawCtx.fill();
         }
 
-        // Prevent iOS scroll
-        document.getElementById('videoContainer').addEventListener('touchmove', (e) => {
-            if (isRunning || currentMode === 'record') e.preventDefault();
-        }, { passive: false });
-
-        // Save dialog and video library functions
-        function showSaveDialog() {
-            const dialog = document.getElementById('saveDialog');
-            document.getElementById('finalTime').textContent = stopwatchElapsed.toFixed(2) + 's';
-            document.getElementById('videoName').value = '';
-            dialog.classList.add('show');
-            
-            setTimeout(() => document.getElementById('videoName').focus(), 100);
-        }
-
-        function showSaveDialogRecord() {
-            const dialog = document.getElementById('saveDialog');
-            const duration = (frames.length / 30).toFixed(1);
-            document.getElementById('finalTime').textContent = duration + 's (' + frames.length + ' frames)';
-            document.getElementById('videoName').value = '';
-            dialog.classList.add('show');
-            
-            setTimeout(() => document.getElementById('videoName').focus(), 100);
-        }
-
-        function saveVideo() {
-            const name = document.getElementById('videoName').value.trim() || 
-                (currentMode === 'stopwatch' ? 'Sprint ' : 'Opname ') + (savedVideos.length + 1);
-            
-            const video = {
-                id: Date.now(),
-                name: name,
-                time: currentMode === 'stopwatch' ? stopwatchElapsed.toFixed(2) : ((frames.length / 30).toFixed(1)),
-                date: new Date().toLocaleString('nl-NL'),
-                frames: frames.length,
-                mode: currentMode
-            };
-            
-            savedVideos.push(video);
-            
-            try {
-                localStorage.setItem('savedStopwatchVideos', JSON.stringify(savedVideos));
-            } catch (e) {
-                alert('Kan video niet opslaan. Te weinig ruimte.');
-            }
-            
-            currentVideoFrames = [...frames];
-            
-            document.getElementById('saveDialog').classList.remove('show');
-            updateSavedVideosList();
-            
-            if (currentMode === 'record') {
-                updateSavedRecordingsList();
-            }
-            
-            playbackControls.classList.add('show');
-            liveControls.classList.remove('show');
-            stopwatchControls.classList.remove('show');
-            
-            if (currentMode === 'record') {
-                document.getElementById('savedRecordingsSection').style.display = 'block';
-            }
-            
-            currentFrameIndex = 0;
-            displayFrame(0);
-            updatePlaybackUI();
-        }
-
-        function discardVideo() {
-            if (confirm('Weet je zeker dat je deze opname wilt verwijderen?')) {
-                frames = [];
-                currentVideoFrames = null;
-                document.getElementById('saveDialog').classList.remove('show');
-                
-                if (currentMode === 'stopwatch') {
-                    stopwatchControls.classList.add('show');
-                } else if (currentMode === 'record') {
-                    liveControls.classList.add('show');
-                    topBar.classList.remove('show');
-                }
-                
-                mainButton.classList.remove('recording');
-                updateUIForMode();
-            }
-        }
-
-        function updateSavedVideosList() {
-            const section = document.getElementById('savedVideosSection');
-            const list = document.getElementById('savedVideosList');
-            
-            if (savedVideos.length === 0) {
-                section.style.display = 'none';
-                return;
-            }
-            
-            section.style.display = 'block';
-            list.innerHTML = '';
-            
-            const stopwatchVideos = savedVideos.filter(v => v.mode === 'stopwatch');
-            
-            if (stopwatchVideos.length === 0) {
-                section.style.display = 'none';
-                return;
-            }
-            
-            [...stopwatchVideos].reverse().forEach(video => {
-                const item = document.createElement('div');
-                item.className = 'saved-video-item';
-                item.innerHTML = `
-                    <div class="video-info">
-                        <div class="video-name">📹 ${video.name}</div>
-                        <div class="video-details">${video.date}</div>
-                    </div>
-                    <div class="video-time">${video.time}s</div>
-                    <button class="delete-video-btn" onclick="deleteSavedVideo(${video.id}); event.stopPropagation();">🗑️</button>
-                `;
-                
-                item.onclick = () => loadSavedVideo(video);
-                list.appendChild(item);
-            });
-        }
-
-        function updateSavedRecordingsList() {
-            const section = document.getElementById('savedRecordingsSection');
-            const list = document.getElementById('savedRecordingsList');
-            
+        // Library
+        function updateLibrary() {
             const recordings = savedVideos.filter(v => v.mode === 'record');
+            const stopwatch = savedVideos.filter(v => v.mode === 'stopwatch');
             
-            if (recordings.length === 0) {
-                section.style.display = 'none';
+            document.getElementById('recordingsCount').textContent = recordings.length;
+            document.getElementById('stopwatchCount').textContent = stopwatch.length;
+            
+            updateVideoList('recordingsList', recordings, '🎬');
+            updateVideoList('stopwatchList', stopwatch, '⏱️');
+        }
+
+        function updateVideoList(listId, videos, icon) {
+            const list = document.getElementById(listId);
+            
+            if (videos.length === 0) {
+                list.innerHTML = '<div class="empty-state">Nog geen opnames</div>';
                 return;
             }
             
-            section.style.display = 'block';
             list.innerHTML = '';
             
-            [...recordings].reverse().forEach(video => {
+            [...videos].reverse().forEach(video => {
                 const item = document.createElement('div');
-                item.className = 'saved-video-item';
+                item.className = 'video-item';
                 item.innerHTML = `
+                    <div class="video-icon">${icon}</div>
                     <div class="video-info">
-                        <div class="video-name">🎬 ${video.name}</div>
-                        <div class="video-details">${video.date}</div>
+                        <div class="video-name">${video.name}</div>
+                        <div class="video-meta">${video.date}</div>
                     </div>
                     <div class="video-time">${video.time}s</div>
-                    <button class="delete-video-btn" onclick="deleteSavedVideo(${video.id}); event.stopPropagation();">🗑️</button>
+                    <div class="video-actions">
+                        <div class="icon-btn" onclick="event.stopPropagation(); deleteVideo(${video.id});">🗑️</div>
+                    </div>
                 `;
                 
-                item.onclick = () => loadSavedVideo(video);
+                item.onclick = () => {
+                    alert('Video frames niet meer beschikbaar.\\nAlleen de laatst opgenomen video kan worden afgespeeld.');
+                };
+                
                 list.appendChild(item);
             });
         }
 
-        function loadSavedVideo(video) {
-            if (currentVideoFrames && currentVideoFrames.length > 0) {
-                frames = [...currentVideoFrames];
-                displayCanvas.dataset.stopwatchMode = 'true';
-                playbackControls.classList.add('show');
-                stopwatchControls.classList.remove('show');
-                currentFrameIndex = 0;
-                displayFrame(0);
-                updatePlaybackUI();
-            } else {
-                alert('Video frames niet meer beschikbaar.\nAlleen de laatst opgenomen video kan worden afgespeeld.\n\nTip: Download belangrijke video\'s!');
-            }
-        }
-
-        function deleteSavedVideo(id) {
-            if (confirm('Deze video verwijderen?')) {
+        function deleteVideo(id) {
+            if (confirm('Video verwijderen?')) {
                 savedVideos = savedVideos.filter(v => v.id !== id);
-                localStorage.setItem('savedStopwatchVideos', JSON.stringify(savedVideos));
-                updateSavedVideosList();
-                updateSavedRecordingsList();
+                localStorage.setItem('savedVideos', JSON.stringify(savedVideos));
+                updateLibrary();
             }
         }
 
         function loadSavedVideos() {
-            const saved = localStorage.getItem('savedStopwatchVideos');
+            const saved = localStorage.getItem('savedVideos');
             if (saved) {
                 try {
                     savedVideos = JSON.parse(saved);
-                    updateSavedVideosList();
-                    updateSavedRecordingsList();
+                    updateLibrary();
                 } catch (e) {
                     savedVideos = [];
                 }
