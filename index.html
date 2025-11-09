@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Video Analyse">
     <meta name="theme-color" content="#000000">
-    <title>Sport Video Analyse</title>
+    <title>Sport Video Analyse Pro</title>
     <style>
         * {
             margin: 0;
@@ -49,11 +49,24 @@
             overflow: hidden;
         }
 
-        #displayCanvas {
+        #canvasWrapper {
+            position: relative;
             max-width: 100%;
             max-height: 100%;
+        }
+
+        #displayCanvas, #drawCanvas {
             display: block;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #drawCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
             touch-action: none;
+            cursor: crosshair;
         }
 
         #sourceVideo {
@@ -68,6 +81,7 @@
             transform: translate(-50%, -50%);
             text-align: center;
             transition: opacity 0.3s;
+            max-width: 90%;
         }
 
         #welcome.hidden {
@@ -83,8 +97,8 @@
 
         #welcome p {
             color: #666;
-            font-size: 15px;
-            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.6;
         }
 
         /* Top toolbar */
@@ -94,9 +108,10 @@
             left: 0;
             right: 0;
             padding: env(safe-area-inset-top, 10px) 10px 10px 10px;
-            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 70%, transparent 100%);
             display: none;
-            gap: 8px;
+            flex-direction: column;
+            gap: 10px;
             z-index: 20;
         }
 
@@ -104,24 +119,24 @@
             display: flex;
         }
 
-        .toolbar {
+        .toolbar-row {
             display: flex;
             gap: 8px;
-            flex-wrap: wrap;
+            overflow-x: auto;
+            padding-bottom: 4px;
         }
 
         .tool-btn {
             background: rgba(255, 255, 255, 0.15);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            padding: 8px 16px;
+            padding: 10px 14px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
             transition: all 0.2s;
         }
 
@@ -130,9 +145,78 @@
             background: rgba(255, 255, 255, 0.25);
         }
 
+        .tool-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
         .tool-btn.active {
             background: #4CAF50;
             border-color: #4CAF50;
+        }
+
+        .tool-btn.danger {
+            background: rgba(244, 67, 54, 0.8);
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .color-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .color-btn:active {
+            transform: scale(0.9);
+        }
+
+        .color-btn.active {
+            border-color: white;
+            border-width: 3px;
+            box-shadow: 0 0 12px rgba(255,255,255,0.6);
+        }
+
+        .stroke-width {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
+        .stroke-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .stroke-btn.active {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+
+        .stroke-preview {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: white;
         }
 
         /* Bottom controls */
@@ -140,6 +224,8 @@
             background: rgba(0, 0, 0, 0.95);
             padding: 12px 12px calc(env(safe-area-inset-bottom, 12px) + 12px) 12px;
             border-top: 1px solid #222;
+            max-height: 45vh;
+            overflow-y: auto;
         }
 
         /* Mode selector */
@@ -153,12 +239,12 @@
         .mode-btn {
             flex: 1;
             min-width: 100px;
-            padding: 12px;
+            padding: 12px 8px;
             background: #1a1a1a;
             border: 2px solid #333;
             border-radius: 8px;
             color: white;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -176,7 +262,7 @@
 
         .mode-btn .emoji {
             display: block;
-            font-size: 24px;
+            font-size: 22px;
             margin-bottom: 4px;
         }
 
@@ -239,6 +325,7 @@
             text-align: right;
             color: #4CAF50;
             font-weight: bold;
+            font-size: 15px;
         }
 
         /* Playback controls */
@@ -252,63 +339,124 @@
             display: flex;
         }
 
-        .playback-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .playback-btn {
-            flex: 1;
-            padding: 12px;
-            background: #333;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-        }
-
-        .playback-btn:active {
-            background: #444;
-        }
-
-        .playback-btn.primary {
-            background: #4CAF50;
-        }
-
-        /* Timeline scrubber */
-        #timeline {
-            position: relative;
-            height: 40px;
+        /* Timeline */
+        #timelineContainer {
             background: #1a1a1a;
             border-radius: 8px;
-            overflow: hidden;
+            padding: 12px;
+        }
+
+        #timeline {
+            position: relative;
+            height: 50px;
+            background: #0a0a0a;
+            border-radius: 6px;
+            overflow: visible;
+            cursor: pointer;
+            margin-bottom: 8px;
         }
 
         #timelineProgress {
             height: 100%;
-            background: #4CAF50;
+            background: linear-gradient(90deg, #4CAF50 0%, #66BB6A 100%);
             width: 0%;
-            transition: width 0.1s;
+            border-radius: 6px;
+            transition: width 0.05s linear;
         }
 
         #timelineHandle {
             position: absolute;
-            top: 0;
+            top: -5px;
             left: 0;
-            width: 4px;
-            height: 100%;
+            width: 6px;
+            height: calc(100% + 10px);
             background: white;
-            box-shadow: 0 0 8px rgba(255,255,255,0.5);
+            border-radius: 3px;
+            box-shadow: 0 0 12px rgba(255,255,255,0.8), 0 2px 8px rgba(0,0,0,0.4);
+            cursor: grab;
+            transition: left 0.05s linear;
         }
 
-        /* Frame info */
+        #timelineHandle:active {
+            cursor: grabbing;
+            box-shadow: 0 0 16px rgba(255,255,255,1);
+        }
+
         #frameInfo {
             display: flex;
             justify-content: space-between;
             font-size: 12px;
-            color: #666;
-            padding: 0 4px;
+            color: #888;
+        }
+
+        #frameInfo strong {
+            color: #4CAF50;
+        }
+
+        /* Navigation buttons */
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .nav-btn {
+            padding: 14px 8px;
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:active {
+            background: #3a3a3a;
+            transform: scale(0.95);
+        }
+
+        .nav-btn.primary {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            font-size: 24px;
+        }
+
+        .nav-btn.primary:active {
+            background: #45a049;
+        }
+
+        /* Skip buttons */
+        .skip-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .skip-btn {
+            flex: 1;
+            padding: 10px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #888;
+            font-size: 11px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .skip-btn:active {
+            background: #2a2a2a;
+        }
+
+        /* Speed control */
+        #speedControl {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 8px;
         }
 
         /* Main action button */
@@ -326,54 +474,37 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            transition: all 0.2s;
         }
 
         #mainButton:active {
             background: #45a049;
+            transform: scale(0.98);
         }
 
         #mainButton.recording {
             background: #f44336;
         }
 
-        /* Drawing tools */
-        #drawingTools {
-            display: none;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        #drawingTools.show {
-            display: flex;
-        }
-
-        .color-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 2px solid #333;
-            cursor: pointer;
-        }
-
-        .color-btn.active {
-            border-color: white;
-            box-shadow: 0 0 8px rgba(255,255,255,0.5);
+        #mainButton.recording:active {
+            background: #da190b;
         }
 
         /* Status badge */
         #statusBadge {
             position: absolute;
-            bottom: 20px;
+            top: calc(env(safe-area-inset-top, 20px) + 70px);
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(76, 175, 80, 0.9);
-            padding: 8px 16px;
+            background: rgba(76, 175, 80, 0.95);
+            padding: 10px 20px;
             border-radius: 20px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             backdrop-filter: blur(10px);
             display: none;
             z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         #statusBadge.show {
@@ -381,41 +512,74 @@
         }
 
         #statusBadge.buffering {
-            background: rgba(255, 152, 0, 0.9);
+            background: rgba(255, 152, 0, 0.95);
+        }
+
+        /* Helper text */
+        .helper-text {
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+            margin-top: 8px;
+            line-height: 1.4;
         }
     </style>
 </head>
 <body>
     <div id="app">
         <div id="videoContainer">
-            <canvas id="displayCanvas"></canvas>
+            <div id="canvasWrapper">
+                <canvas id="displayCanvas"></canvas>
+                <canvas id="drawCanvas"></canvas>
+            </div>
             <video id="sourceVideo" playsinline webkit-playsinline muted></video>
             
             <div id="welcome">
-                <h1>🎥 Sport Video Analyse</h1>
-                <p>Kies een modus hieronder</p>
-                <p style="margin-top: 16px;">
-                    <strong>Live Delay:</strong> Directe analyse<br>
-                    <strong>Opname:</strong> Frame-by-frame analyse<br>
-                    <strong>Vergelijk:</strong> 2 video's naast elkaar
-                </p>
+                <h1>🎥 Video Analyse Pro</h1>
+                <p><strong>Live Delay:</strong> Directe analyse met vertraging</p>
+                <p><strong>Opname:</strong> Frame-by-frame met teken-tools</p>
+                <p style="margin-top: 12px; font-size: 12px;">Perfect voor techniekanalyse in LO-lessen</p>
             </div>
 
             <div id="statusBadge" class="buffering">Buffering 0%</div>
 
             <div id="topBar">
-                <div class="toolbar" id="drawingTools">
+                <!-- Drawing tools -->
+                <div class="toolbar-row">
                     <button class="tool-btn active" data-tool="pen">✏️ Pen</button>
                     <button class="tool-btn" data-tool="line">📏 Lijn</button>
                     <button class="tool-btn" data-tool="arrow">➡️ Pijl</button>
                     <button class="tool-btn" data-tool="circle">⭕ Cirkel</button>
                     <button class="tool-btn" data-tool="angle">📐 Hoek</button>
-                    <div class="color-btn" data-color="#FF0000" style="background: #FF0000;"></div>
-                    <div class="color-btn active" data-color="#00FF00" style="background: #00FF00;"></div>
-                    <div class="color-btn" data-color="#0000FF" style="background: #0000FF;"></div>
-                    <div class="color-btn" data-color="#FFFF00" style="background: #FFFF00;"></div>
-                    <div class="color-btn" data-color="#FFFFFF" style="background: #FFFFFF;"></div>
-                    <button class="tool-btn" onclick="clearDrawings()">🗑️ Wis</button>
+                    <button class="tool-btn" data-tool="rect">▭ Rechthoek</button>
+                </div>
+                
+                <!-- Colors & stroke -->
+                <div class="toolbar-row">
+                    <div class="color-picker">
+                        <div class="color-btn" data-color="#FF0000" style="background: #FF0000;"></div>
+                        <div class="color-btn active" data-color="#00FF00" style="background: #00FF00;"></div>
+                        <div class="color-btn" data-color="#0080FF" style="background: #0080FF;"></div>
+                        <div class="color-btn" data-color="#FFFF00" style="background: #FFFF00;"></div>
+                        <div class="color-btn" data-color="#FF00FF" style="background: #FF00FF;"></div>
+                        <div class="color-btn" data-color="#FFFFFF" style="background: #FFFFFF;"></div>
+                    </div>
+                    
+                    <div class="stroke-width">
+                        <div class="stroke-btn" data-stroke="2">
+                            <div class="stroke-preview" style="width: 4px; height: 4px;"></div>
+                        </div>
+                        <div class="stroke-btn active" data-stroke="4">
+                            <div class="stroke-preview" style="width: 8px; height: 8px;"></div>
+                        </div>
+                        <div class="stroke-btn" data-stroke="6">
+                            <div class="stroke-preview" style="width: 12px; height: 12px;"></div>
+                        </div>
+                    </div>
+
+                    <button class="tool-btn" onclick="undoDrawing()" id="undoBtn" disabled>↶ Undo</button>
+                    <button class="tool-btn" onclick="redoDrawing()" id="redoBtn" disabled>↷ Redo</button>
+                    <button class="tool-btn danger" onclick="clearAllDrawings()">🗑️ Wis Alles</button>
                 </div>
             </div>
         </div>
@@ -429,10 +593,6 @@
                 <button class="mode-btn" data-mode="record">
                     <span class="emoji">🎬</span>
                     Opname
-                </button>
-                <button class="mode-btn" data-mode="compare">
-                    <span class="emoji">⚖️</span>
-                    Vergelijk
                 </button>
             </div>
 
@@ -453,26 +613,41 @@
 
                 <!-- Playback mode -->
                 <div id="playbackControls">
-                    <div id="timeline">
-                        <div id="timelineProgress"></div>
-                        <div id="timelineHandle"></div>
+                    <div id="timelineContainer">
+                        <div id="timeline">
+                            <div id="timelineProgress"></div>
+                            <div id="timelineHandle"></div>
+                        </div>
+                        <div id="frameInfo">
+                            <span>Frame: <strong id="currentFrame">0/0</strong></span>
+                            <span>Tijd: <strong id="currentTime">0.0s</strong></span>
+                        </div>
                     </div>
-                    <div id="frameInfo">
-                        <span id="currentFrame">Frame: 0/0</span>
-                        <span id="currentTime">0.0s</span>
+
+                    <div class="nav-buttons">
+                        <button class="nav-btn" onclick="jumpToStart()" title="Naar begin">⏮️</button>
+                        <button class="nav-btn" onclick="previousFrame()" title="Vorige frame">◀️</button>
+                        <button class="nav-btn primary" id="playPauseBtn" onclick="togglePlayPause()" title="Play/Pause">▶️</button>
+                        <button class="nav-btn" onclick="nextFrame()" title="Volgende frame">▶️</button>
+                        <button class="nav-btn" onclick="jumpToEnd()" title="Naar einde">⏭️</button>
                     </div>
-                    <div class="playback-buttons">
-                        <button class="playback-btn" onclick="previousFrame()">⏮️</button>
-                        <button class="playback-btn" onclick="stepBackward()">◀️</button>
-                        <button class="playback-btn primary" id="playPauseBtn" onclick="togglePlayPause()">▶️</button>
-                        <button class="playback-btn" onclick="stepForward()">▶️</button>
-                        <button class="playback-btn" onclick="nextFrame()">⏭️</button>
+
+                    <div class="skip-buttons">
+                        <button class="skip-btn" onclick="skipFrames(-30)">◀◀ -1s</button>
+                        <button class="skip-btn" onclick="skipFrames(-10)">◀ -10 frames</button>
+                        <button class="skip-btn" onclick="skipFrames(10)">10 frames ▶</button>
+                        <button class="skip-btn" onclick="skipFrames(30)">1s ▶▶</button>
                     </div>
-                    <div class="control-row">
-                        <label>Snelheid:</label>
-                        <input type="range" id="playbackSpeed" min="25" max="200" value="100" step="25">
-                        <span class="value-display"><span id="playbackSpeedValue">100</span>%</span>
+
+                    <div id="speedControl">
+                        <div class="control-row">
+                            <label>Snelheid:</label>
+                            <input type="range" id="playbackSpeed" min="10" max="200" value="50" step="10">
+                            <span class="value-display"><span id="playbackSpeedValue">50</span>%</span>
+                        </div>
                     </div>
+
+                    <p class="helper-text">💡 Tip: Sleep de witte balk voor snelle navigatie. Gebruik skip-knoppen voor grote sprongen.</p>
                 </div>
 
                 <button id="mainButton">
@@ -487,18 +662,20 @@
         // Elements
         const sourceVideo = document.getElementById('sourceVideo');
         const displayCanvas = document.getElementById('displayCanvas');
-        const ctx = displayCanvas.getContext('2d', { willReadFrequently: false });
+        const drawCanvas = document.getElementById('drawCanvas');
+        const displayCtx = displayCanvas.getContext('2d', { willReadFrequently: false });
+        const drawCtx = drawCanvas.getContext('2d', { willReadFrequently: false });
         const welcome = document.getElementById('welcome');
         const topBar = document.getElementById('topBar');
         const statusBadge = document.getElementById('statusBadge');
         const mainButton = document.getElementById('mainButton');
         const buttonIcon = document.getElementById('buttonIcon');
         const buttonText = document.getElementById('buttonText');
+        const canvasWrapper = document.getElementById('canvasWrapper');
 
         // Mode controls
         const liveControls = document.getElementById('liveControls');
         const playbackControls = document.getElementById('playbackControls');
-        const drawingTools = document.getElementById('drawingTools');
 
         // Sliders
         const delaySlider = document.getElementById('delaySlider');
@@ -511,16 +688,21 @@
         let isRunning = false;
         let stream = null;
         let frames = [];
-        let maxFrames = 150; // 5s at 30fps
+        let maxFrames = 150;
         let animationId = null;
-        let playbackSpeed = 100;
+        let playbackSpeed = 50;
         let currentFrameIndex = 0;
         let isPlaying = false;
+        
+        // Drawing state
         let drawings = [];
+        let undoStack = [];
         let currentTool = 'pen';
         let currentColor = '#00FF00';
+        let strokeWidth = 4;
         let isDrawing = false;
         let drawStart = null;
+        let penPath = [];
 
         // Update sliders
         delaySlider.oninput = () => {
@@ -532,7 +714,6 @@
         speedSlider.oninput = () => {
             const val = parseInt(speedSlider.value);
             speedValue.textContent = val;
-            playbackSpeed = val;
         };
 
         document.getElementById('playbackSpeed').oninput = (e) => {
@@ -560,7 +741,6 @@
         function updateUIForMode() {
             liveControls.classList.remove('show');
             playbackControls.classList.remove('show');
-            drawingTools.classList.remove('show');
 
             switch(currentMode) {
                 case 'live':
@@ -570,13 +750,8 @@
                     break;
                 case 'record':
                     liveControls.classList.add('show');
-                    drawingTools.classList.add('show');
                     buttonIcon.textContent = '⏺️';
                     buttonText.textContent = 'Start Opname';
-                    break;
-                case 'compare':
-                    buttonIcon.textContent = '📁';
-                    buttonText.textContent = 'Selecteer Videos';
                     break;
             }
         }
@@ -604,10 +779,35 @@
                 sourceVideo.srcObject = stream;
                 await sourceVideo.play();
 
-                displayCanvas.width = sourceVideo.videoWidth;
-                displayCanvas.height = sourceVideo.videoHeight;
+                const width = sourceVideo.videoWidth;
+                const height = sourceVideo.videoHeight;
+                
+                displayCanvas.width = width;
+                displayCanvas.height = height;
+                drawCanvas.width = width;
+                drawCanvas.height = height;
+
+                // Size canvas wrapper to maintain aspect ratio
+                const aspectRatio = width / height;
+                const containerWidth = canvasWrapper.parentElement.clientWidth;
+                const containerHeight = canvasWrapper.parentElement.clientHeight;
+                
+                let displayWidth, displayHeight;
+                if (containerWidth / containerHeight > aspectRatio) {
+                    displayHeight = containerHeight;
+                    displayWidth = displayHeight * aspectRatio;
+                } else {
+                    displayWidth = containerWidth;
+                    displayHeight = displayWidth / aspectRatio;
+                }
+                
+                canvasWrapper.style.width = displayWidth + 'px';
+                canvasWrapper.style.height = displayHeight + 'px';
 
                 frames = [];
+                drawings = [];
+                undoStack = [];
+                updateUndoRedoButtons();
                 isRunning = true;
                 welcome.classList.add('hidden');
 
@@ -647,14 +847,17 @@
 
             if (currentMode === 'live') {
                 frames = [];
-                ctx.clearRect(0, 0, displayCanvas.width, displayCanvas.height);
+                displayCtx.clearRect(0, 0, displayCanvas.width, displayCanvas.height);
+                drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
                 welcome.classList.remove('hidden');
                 statusBadge.classList.remove('show');
+                topBar.classList.remove('show');
             } else if (currentMode === 'record') {
                 // Switch to playback mode
                 playbackControls.classList.add('show');
                 liveControls.classList.remove('show');
                 currentFrameIndex = 0;
+                displayFrame(0);
                 updatePlaybackUI();
             }
 
@@ -665,8 +868,8 @@
         function captureLiveLoop() {
             if (!isRunning) return;
 
-            ctx.drawImage(sourceVideo, 0, 0);
-            const frame = ctx.getImageData(0, 0, displayCanvas.width, displayCanvas.height);
+            displayCtx.drawImage(sourceVideo, 0, 0);
+            const frame = displayCtx.getImageData(0, 0, displayCanvas.width, displayCanvas.height);
             frames.push(frame);
 
             if (frames.length > maxFrames) {
@@ -679,12 +882,13 @@
 
             if (frames.length >= maxFrames) {
                 statusBadge.classList.remove('buffering');
-                ctx.putImageData(frames[0], 0, 0);
+                displayCtx.putImageData(frames[0], 0, 0);
             } else {
-                ctx.putImageData(frame, 0, 0);
+                displayCtx.putImageData(frame, 0, 0);
             }
 
-            const delay = 1000 / (30 * (playbackSpeed / 100));
+            const speed = parseInt(speedSlider.value) / 100;
+            const delay = 1000 / (30 * speed);
             setTimeout(() => {
                 animationId = requestAnimationFrame(captureLiveLoop);
             }, delay);
@@ -693,11 +897,9 @@
         function captureRecordLoop() {
             if (!isRunning) return;
 
-            ctx.drawImage(sourceVideo, 0, 0);
-            const frame = ctx.getImageData(0, 0, displayCanvas.width, displayCanvas.height);
+            displayCtx.drawImage(sourceVideo, 0, 0);
+            const frame = displayCtx.getImageData(0, 0, displayCanvas.width, displayCanvas.height);
             frames.push(frame);
-
-            drawAnnotations();
 
             setTimeout(() => {
                 animationId = requestAnimationFrame(captureRecordLoop);
@@ -714,7 +916,9 @@
         }
 
         function playLoop() {
-            if (!isPlaying || currentFrameIndex >= frames.length - 1) {
+            if (!isPlaying) return;
+            
+            if (currentFrameIndex >= frames.length - 1) {
                 isPlaying = false;
                 document.getElementById('playPauseBtn').textContent = '▶️';
                 return;
@@ -729,7 +933,9 @@
             }, 1000 / (30 * (playbackSpeed / 100)));
         }
 
-        function stepForward() {
+        function nextFrame() {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶️';
             if (currentFrameIndex < frames.length - 1) {
                 currentFrameIndex++;
                 displayFrame(currentFrameIndex);
@@ -737,7 +943,9 @@
             }
         }
 
-        function stepBackward() {
+        function previousFrame() {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶️';
             if (currentFrameIndex > 0) {
                 currentFrameIndex--;
                 displayFrame(currentFrameIndex);
@@ -745,22 +953,34 @@
             }
         }
 
-        function previousFrame() {
+        function jumpToStart() {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶️';
             currentFrameIndex = 0;
             displayFrame(currentFrameIndex);
             updatePlaybackUI();
         }
 
-        function nextFrame() {
+        function jumpToEnd() {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶️';
             currentFrameIndex = frames.length - 1;
+            displayFrame(currentFrameIndex);
+            updatePlaybackUI();
+        }
+
+        function skipFrames(amount) {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶️';
+            currentFrameIndex = Math.max(0, Math.min(frames.length - 1, currentFrameIndex + amount));
             displayFrame(currentFrameIndex);
             updatePlaybackUI();
         }
 
         function displayFrame(index) {
             if (frames[index]) {
-                ctx.putImageData(frames[index], 0, 0);
-                drawAnnotations();
+                displayCtx.putImageData(frames[index], 0, 0);
+                redrawAnnotations();
             }
         }
 
@@ -768,8 +988,39 @@
             const progress = (currentFrameIndex / (frames.length - 1)) * 100;
             document.getElementById('timelineProgress').style.width = progress + '%';
             document.getElementById('timelineHandle').style.left = progress + '%';
-            document.getElementById('currentFrame').textContent = `Frame: ${currentFrameIndex + 1}/${frames.length}`;
+            document.getElementById('currentFrame').textContent = `${currentFrameIndex + 1}/${frames.length}`;
             document.getElementById('currentTime').textContent = `${(currentFrameIndex / 30).toFixed(1)}s`;
+        }
+
+        // Timeline interaction
+        let isDraggingTimeline = false;
+
+        document.getElementById('timeline').addEventListener('pointerdown', (e) => {
+            isDraggingTimeline = true;
+            seekTimeline(e);
+        });
+
+        document.addEventListener('pointermove', (e) => {
+            if (isDraggingTimeline) {
+                seekTimeline(e);
+            }
+        });
+
+        document.addEventListener('pointerup', () => {
+            isDraggingTimeline = false;
+        });
+
+        function seekTimeline(e) {
+            const timeline = document.getElementById('timeline');
+            const rect = timeline.getBoundingClientRect();
+            const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            currentFrameIndex = Math.floor(percent * (frames.length - 1));
+            
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶️';
+            
+            displayFrame(currentFrameIndex);
+            updatePlaybackUI();
         }
 
         // Drawing tools
@@ -789,84 +1040,202 @@
             };
         });
 
-        function clearDrawings() {
-            drawings = [];
-            if (currentMode === 'record' && !isRunning && frames.length > 0) {
-                displayFrame(currentFrameIndex);
+        document.querySelectorAll('[data-stroke]').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('[data-stroke]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                strokeWidth = parseInt(btn.dataset.stroke);
+            };
+        });
+
+        function clearAllDrawings() {
+            if (confirm('Weet je zeker dat je alle tekeningen wilt wissen?')) {
+                undoStack.push([...drawings]);
+                drawings = [];
+                updateUndoRedoButtons();
+                redrawAnnotations();
             }
         }
 
+        function undoDrawing() {
+            if (drawings.length > 0) {
+                undoStack.push(drawings.pop());
+                updateUndoRedoButtons();
+                redrawAnnotations();
+            }
+        }
+
+        function redoDrawing() {
+            if (undoStack.length > 0) {
+                drawings.push(undoStack.pop());
+                updateUndoRedoButtons();
+                redrawAnnotations();
+            }
+        }
+
+        function updateUndoRedoButtons() {
+            document.getElementById('undoBtn').disabled = drawings.length === 0;
+            document.getElementById('redoBtn').disabled = undoStack.length === 0;
+        }
+
         // Canvas drawing
-        displayCanvas.addEventListener('pointerdown', startDrawing);
-        displayCanvas.addEventListener('pointermove', draw);
-        displayCanvas.addEventListener('pointerup', stopDrawing);
-        displayCanvas.addEventListener('pointercancel', stopDrawing);
+        drawCanvas.addEventListener('pointerdown', startDrawing);
+        drawCanvas.addEventListener('pointermove', draw);
+        drawCanvas.addEventListener('pointerup', stopDrawing);
+        drawCanvas.addEventListener('pointercancel', stopDrawing);
+
+        function getCanvasCoords(e) {
+            const rect = drawCanvas.getBoundingClientRect();
+            return {
+                x: (e.clientX - rect.left) * (drawCanvas.width / rect.width),
+                y: (e.clientY - rect.top) * (drawCanvas.height / rect.height)
+            };
+        }
 
         function startDrawing(e) {
             if (currentMode !== 'record' || isRunning) return;
             
+            e.preventDefault();
             isDrawing = true;
-            const rect = displayCanvas.getBoundingClientRect();
-            drawStart = {
-                x: (e.clientX - rect.left) * (displayCanvas.width / rect.width),
-                y: (e.clientY - rect.top) * (displayCanvas.height / rect.height)
-            };
+            drawStart = getCanvasCoords(e);
+            penPath = [drawStart];
+            undoStack = []; // Clear redo stack on new drawing
         }
 
         function draw(e) {
             if (!isDrawing) return;
+            e.preventDefault();
 
-            const rect = displayCanvas.getBoundingClientRect();
-            const x = (e.clientX - rect.left) * (displayCanvas.width / rect.width);
-            const y = (e.clientY - rect.top) * (displayCanvas.height / rect.height);
+            const pos = getCanvasCoords(e);
 
             if (currentTool === 'pen') {
-                drawings.push({
-                    type: 'line',
-                    x1: drawStart.x,
-                    y1: drawStart.y,
-                    x2: x,
-                    y2: y,
-                    color: currentColor
-                });
-                drawStart = { x, y };
-                displayFrame(currentFrameIndex);
+                penPath.push(pos);
+                redrawAnnotations();
+                drawTempPath(penPath);
+            } else {
+                redrawAnnotations();
+                drawTempShape(drawStart, pos);
             }
         }
 
         function stopDrawing(e) {
             if (!isDrawing) return;
+            e.preventDefault();
             isDrawing = false;
 
-            const rect = displayCanvas.getBoundingClientRect();
-            const x = (e.clientX - rect.left) * (displayCanvas.width / rect.width);
-            const y = (e.clientY - rect.top) * (displayCanvas.height / rect.height);
+            const pos = getCanvasCoords(e);
 
-            if (currentTool !== 'pen') {
+            if (currentTool === 'pen') {
+                drawings.push({
+                    type: 'pen',
+                    path: [...penPath],
+                    color: currentColor,
+                    width: strokeWidth
+                });
+            } else {
                 drawings.push({
                     type: currentTool,
                     x1: drawStart.x,
                     y1: drawStart.y,
-                    x2: x,
-                    y2: y,
-                    color: currentColor
+                    x2: pos.x,
+                    y2: pos.y,
+                    color: currentColor,
+                    width: strokeWidth
                 });
-                displayFrame(currentFrameIndex);
+            }
+
+            updateUndoRedoButtons();
+            redrawAnnotations();
+        }
+
+        function drawTempPath(path) {
+            if (path.length < 2) return;
+            
+            drawCtx.strokeStyle = currentColor;
+            drawCtx.lineWidth = strokeWidth;
+            drawCtx.lineCap = 'round';
+            drawCtx.lineJoin = 'round';
+            
+            drawCtx.beginPath();
+            drawCtx.moveTo(path[0].x, path[0].y);
+            for (let i = 1; i < path.length; i++) {
+                drawCtx.lineTo(path[i].x, path[i].y);
+            }
+            drawCtx.stroke();
+        }
+
+        function drawTempShape(start, end) {
+            drawCtx.strokeStyle = currentColor;
+            drawCtx.lineWidth = strokeWidth;
+            drawCtx.lineCap = 'round';
+
+            switch(currentTool) {
+                case 'line':
+                    drawCtx.beginPath();
+                    drawCtx.moveTo(start.x, start.y);
+                    drawCtx.lineTo(end.x, end.y);
+                    drawCtx.stroke();
+                    break;
+                case 'arrow':
+                    drawArrow(start.x, start.y, end.x, end.y);
+                    break;
+                case 'circle':
+                    const radius = Math.sqrt(
+                        Math.pow(end.x - start.x, 2) + 
+                        Math.pow(end.y - start.y, 2)
+                    );
+                    drawCtx.beginPath();
+                    drawCtx.arc(start.x, start.y, radius, 0, 2 * Math.PI);
+                    drawCtx.stroke();
+                    break;
+                case 'rect':
+                    drawCtx.beginPath();
+                    drawCtx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
+                    drawCtx.stroke();
+                    break;
+                case 'angle':
+                    // Draw angle with three points (start, middle auto-calculated, end)
+                    const midX = (start.x + end.x) / 2;
+                    const midY = start.y;
+                    drawCtx.beginPath();
+                    drawCtx.moveTo(start.x, start.y);
+                    drawCtx.lineTo(midX, midY);
+                    drawCtx.lineTo(end.x, end.y);
+                    drawCtx.stroke();
+                    
+                    // Draw angle arc
+                    const angle = Math.atan2(end.y - midY, end.x - midX);
+                    drawCtx.beginPath();
+                    drawCtx.arc(midX, midY, 30, Math.PI, angle, false);
+                    drawCtx.stroke();
+                    break;
             }
         }
 
-        function drawAnnotations() {
+        function redrawAnnotations() {
+            drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+            
             drawings.forEach(drawing => {
-                ctx.strokeStyle = drawing.color;
-                ctx.lineWidth = 3;
-                ctx.lineCap = 'round';
+                drawCtx.strokeStyle = drawing.color;
+                drawCtx.lineWidth = drawing.width;
+                drawCtx.lineCap = 'round';
+                drawCtx.lineJoin = 'round';
 
                 switch(drawing.type) {
+                    case 'pen':
+                        if (drawing.path.length < 2) break;
+                        drawCtx.beginPath();
+                        drawCtx.moveTo(drawing.path[0].x, drawing.path[0].y);
+                        for (let i = 1; i < drawing.path.length; i++) {
+                            drawCtx.lineTo(drawing.path[i].x, drawing.path[i].y);
+                        }
+                        drawCtx.stroke();
+                        break;
                     case 'line':
-                        ctx.beginPath();
-                        ctx.moveTo(drawing.x1, drawing.y1);
-                        ctx.lineTo(drawing.x2, drawing.y2);
-                        ctx.stroke();
+                        drawCtx.beginPath();
+                        drawCtx.moveTo(drawing.x1, drawing.y1);
+                        drawCtx.lineTo(drawing.x2, drawing.y2);
+                        drawCtx.stroke();
                         break;
                     case 'arrow':
                         drawArrow(drawing.x1, drawing.y1, drawing.x2, drawing.y2);
@@ -876,9 +1245,28 @@
                             Math.pow(drawing.x2 - drawing.x1, 2) + 
                             Math.pow(drawing.y2 - drawing.y1, 2)
                         );
-                        ctx.beginPath();
-                        ctx.arc(drawing.x1, drawing.y1, radius, 0, 2 * Math.PI);
-                        ctx.stroke();
+                        drawCtx.beginPath();
+                        drawCtx.arc(drawing.x1, drawing.y1, radius, 0, 2 * Math.PI);
+                        drawCtx.stroke();
+                        break;
+                    case 'rect':
+                        drawCtx.beginPath();
+                        drawCtx.rect(drawing.x1, drawing.y1, drawing.x2 - drawing.x1, drawing.y2 - drawing.y1);
+                        drawCtx.stroke();
+                        break;
+                    case 'angle':
+                        const midX = (drawing.x1 + drawing.x2) / 2;
+                        const midY = drawing.y1;
+                        drawCtx.beginPath();
+                        drawCtx.moveTo(drawing.x1, drawing.y1);
+                        drawCtx.lineTo(midX, midY);
+                        drawCtx.lineTo(drawing.x2, drawing.y2);
+                        drawCtx.stroke();
+                        
+                        const angle = Math.atan2(drawing.y2 - midY, drawing.x2 - midX);
+                        drawCtx.beginPath();
+                        drawCtx.arc(midX, midY, 30, Math.PI, angle, false);
+                        drawCtx.stroke();
                         break;
                 }
             });
@@ -886,38 +1274,32 @@
 
         function drawArrow(x1, y1, x2, y2) {
             const angle = Math.atan2(y2 - y1, x2 - x1);
-            const headLength = 20;
+            const headLength = strokeWidth * 5;
 
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
+            drawCtx.beginPath();
+            drawCtx.moveTo(x1, y1);
+            drawCtx.lineTo(x2, y2);
+            drawCtx.stroke();
 
-            ctx.beginPath();
-            ctx.moveTo(x2, y2);
-            ctx.lineTo(
+            drawCtx.beginPath();
+            drawCtx.moveTo(x2, y2);
+            drawCtx.lineTo(
                 x2 - headLength * Math.cos(angle - Math.PI / 6),
                 y2 - headLength * Math.sin(angle - Math.PI / 6)
             );
-            ctx.lineTo(
+            drawCtx.lineTo(
                 x2 - headLength * Math.cos(angle + Math.PI / 6),
                 y2 - headLength * Math.sin(angle + Math.PI / 6)
             );
-            ctx.lineTo(x2, y2);
-            ctx.fillStyle = currentColor;
-            ctx.fill();
+            drawCtx.lineTo(x2, y2);
+            drawCtx.fillStyle = currentColor;
+            drawCtx.fill();
         }
 
-        // Timeline scrubbing
-        document.getElementById('timeline').onclick = (e) => {
-            if (frames.length === 0) return;
-            
-            const rect = e.currentTarget.getBoundingClientRect();
-            const percent = (e.clientX - rect.left) / rect.width;
-            currentFrameIndex = Math.floor(percent * (frames.length - 1));
-            displayFrame(currentFrameIndex);
-            updatePlaybackUI();
-        };
+        // Prevent iOS scroll
+        document.getElementById('videoContainer').addEventListener('touchmove', (e) => {
+            if (isRunning || currentMode === 'record') e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
