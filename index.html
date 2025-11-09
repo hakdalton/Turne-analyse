@@ -960,6 +960,12 @@
 
                 <!-- Playback mode -->
                 <div id="playbackControls">
+                    <!-- Saved recordings for record mode -->
+                    <div id="savedRecordingsSection" style="display: none; margin-bottom: 12px;">
+                        <h4 style="color: #4CAF50; margin-bottom: 12px; font-size: 14px;">📚 Opgeslagen Opnames</h4>
+                        <div id="savedRecordingsList"></div>
+                    </div>
+
                     <div id="timelineContainer">
                         <div id="timeline">
                             <div id="timelineProgress"></div>
@@ -1268,12 +1274,9 @@
                 statusBadge.classList.remove('show');
                 topBar.classList.remove('show');
             } else if (currentMode === 'record') {
-                // Switch to playback mode
-                playbackControls.classList.add('show');
-                liveControls.classList.remove('show');
-                currentFrameIndex = 0;
-                displayFrame(0);
-                updatePlaybackUI();
+                // Show save dialog for record mode too
+                topBar.classList.remove('show');
+                showSaveDialogRecord();
             } else if (currentMode === 'stopwatch') {
                 // Stop stopwatch and show save options
                 stopStopwatch();
@@ -1820,15 +1823,27 @@
             setTimeout(() => document.getElementById('videoName').focus(), 100);
         }
 
+        function showSaveDialogRecord() {
+            const dialog = document.getElementById('saveDialog');
+            const duration = (frames.length / 30).toFixed(1);
+            document.getElementById('finalTime').textContent = duration + 's (' + frames.length + ' frames)';
+            document.getElementById('videoName').value = '';
+            dialog.classList.add('show');
+            
+            setTimeout(() => document.getElementById('videoName').focus(), 100);
+        }
+
         function saveVideo() {
-            const name = document.getElementById('videoName').value.trim() || 'Sprint ' + (savedVideos.length + 1);
+            const name = document.getElementById('videoName').value.trim() || 
+                (currentMode === 'stopwatch' ? 'Sprint ' : 'Opname ') + (savedVideos.length + 1);
             
             const video = {
                 id: Date.now(),
                 name: name,
-                time: stopwatchElapsed.toFixed(2),
+                time: currentMode === 'stopwatch' ? stopwatchElapsed.toFixed(2) : ((frames.length / 30).toFixed(1)),
                 date: new Date().toLocaleString('nl-NL'),
-                frames: frames.length
+                frames: frames.length,
+                mode: currentMode
             };
             
             savedVideos.push(video);
@@ -1844,8 +1859,18 @@
             document.getElementById('saveDialog').classList.remove('show');
             updateSavedVideosList();
             
+            if (currentMode === 'record') {
+                updateSavedRecordingsList();
+            }
+            
             playbackControls.classList.add('show');
+            liveControls.classList.remove('show');
             stopwatchControls.classList.remove('show');
+            
+            if (currentMode === 'record') {
+                document.getElementById('savedRecordingsSection').style.display = 'block';
+            }
+            
             currentFrameIndex = 0;
             displayFrame(0);
             updatePlaybackUI();
@@ -1856,7 +1881,14 @@
                 frames = [];
                 currentVideoFrames = null;
                 document.getElementById('saveDialog').classList.remove('show');
-                stopwatchControls.classList.add('show');
+                
+                if (currentMode === 'stopwatch') {
+                    stopwatchControls.classList.add('show');
+                } else if (currentMode === 'record') {
+                    liveControls.classList.add('show');
+                    topBar.classList.remove('show');
+                }
+                
                 mainButton.classList.remove('recording');
                 updateUIForMode();
             }
@@ -1874,12 +1906,50 @@
             section.style.display = 'block';
             list.innerHTML = '';
             
-            [...savedVideos].reverse().forEach(video => {
+            const stopwatchVideos = savedVideos.filter(v => v.mode === 'stopwatch');
+            
+            if (stopwatchVideos.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            
+            [...stopwatchVideos].reverse().forEach(video => {
                 const item = document.createElement('div');
                 item.className = 'saved-video-item';
                 item.innerHTML = `
                     <div class="video-info">
                         <div class="video-name">📹 ${video.name}</div>
+                        <div class="video-details">${video.date}</div>
+                    </div>
+                    <div class="video-time">${video.time}s</div>
+                    <button class="delete-video-btn" onclick="deleteSavedVideo(${video.id}); event.stopPropagation();">🗑️</button>
+                `;
+                
+                item.onclick = () => loadSavedVideo(video);
+                list.appendChild(item);
+            });
+        }
+
+        function updateSavedRecordingsList() {
+            const section = document.getElementById('savedRecordingsSection');
+            const list = document.getElementById('savedRecordingsList');
+            
+            const recordings = savedVideos.filter(v => v.mode === 'record');
+            
+            if (recordings.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            
+            section.style.display = 'block';
+            list.innerHTML = '';
+            
+            [...recordings].reverse().forEach(video => {
+                const item = document.createElement('div');
+                item.className = 'saved-video-item';
+                item.innerHTML = `
+                    <div class="video-info">
+                        <div class="video-name">🎬 ${video.name}</div>
                         <div class="video-details">${video.date}</div>
                     </div>
                     <div class="video-time">${video.time}s</div>
@@ -1910,6 +1980,7 @@
                 savedVideos = savedVideos.filter(v => v.id !== id);
                 localStorage.setItem('savedStopwatchVideos', JSON.stringify(savedVideos));
                 updateSavedVideosList();
+                updateSavedRecordingsList();
             }
         }
 
@@ -1919,6 +1990,7 @@
                 try {
                     savedVideos = JSON.parse(saved);
                     updateSavedVideosList();
+                    updateSavedRecordingsList();
                 } catch (e) {
                     savedVideos = [];
                 }
