@@ -640,6 +640,52 @@
         .stopwatch-info p {
             margin: 0;
         }
+
+        /* Toggle switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            transition: .3s;
+            border-radius: 28px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #4CAF50;
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
     </style>
 </head>
 <body>
@@ -760,6 +806,14 @@
                             <input type="range" id="playbackSpeed" min="25" max="200" value="50" step="25">
                             <span class="value-display"><span id="playbackSpeedValue">50</span>%</span>
                         </div>
+                    </div>
+
+                    <div class="control-row" style="background: #1a1a1a; padding: 10px; border-radius: 8px;">
+                        <label style="flex: 1;">Herhaal automatisch:</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="loopPlayback" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
                     </div>
 
                     <p class="helper-text">💡 Tip: Sleep de witte balk om heen en weer te spoelen</p>
@@ -971,6 +1025,9 @@
                 updateUndoRedoButtons();
                 isRunning = true;
                 welcome.classList.add('hidden');
+                
+                // Reset stopwatch mode flag
+                delete displayCanvas.dataset.stopwatchMode;
 
                 if (currentMode === 'live') {
                     statusBadge.classList.add('show', 'buffering');
@@ -1029,15 +1086,30 @@
                 displayFrame(0);
                 updatePlaybackUI();
             } else if (currentMode === 'stopwatch') {
-                // Stop stopwatch and switch to playback
+                // Stop stopwatch and switch to playback with auto-replay
                 stopStopwatch();
                 stopwatchOverlay.classList.remove('show');
                 stopwatchTime.classList.remove('running');
+                
                 playbackControls.classList.add('show');
                 stopwatchControls.classList.remove('show');
                 currentFrameIndex = 0;
                 displayFrame(0);
                 updatePlaybackUI();
+                
+                // Set a flag so displayFrame knows not to call redrawAnnotations
+                displayCanvas.dataset.stopwatchMode = 'true';
+                
+                // Auto-start replay after a brief pause
+                setTimeout(() => {
+                    if (frames.length > 0) {
+                        isPlaying = true;
+                        const btn = document.getElementById('playPauseBtn');
+                        btn.innerHTML = '<span style="font-size: 32px;">⏸️</span><span>Pauzeren</span>';
+                        btn.classList.add('playing');
+                        playLoop();
+                    }
+                }, 500);
             }
 
             mainButton.classList.remove('recording');
@@ -1104,21 +1176,14 @@
         }
 
         function startStopwatch() {
-            stopwatchStartTime = Date.now();
+            stopwatchStartTime = null; // Will be set on first frame
             stopwatchElapsed = 0;
             updateStopwatchDisplay();
-            
-            stopwatchInterval = setInterval(() => {
-                stopwatchElapsed = (Date.now() - stopwatchStartTime) / 1000;
-                updateStopwatchDisplay();
-            }, 10); // Update every 10ms for smooth display
         }
 
         function stopStopwatch() {
-            if (stopwatchInterval) {
-                clearInterval(stopwatchInterval);
-                stopwatchInterval = null;
-            }
+            // Timer stops automatically when recording stops
+            stopwatchStartTime = null;
         }
 
         function updateStopwatchDisplay() {
@@ -1126,6 +1191,15 @@
         }
 
         function drawStopwatchOnCanvas() {
+            // Initialize start time on first frame
+            if (stopwatchStartTime === null) {
+                stopwatchStartTime = Date.now();
+            }
+            
+            // Calculate elapsed time
+            stopwatchElapsed = (Date.now() - stopwatchStartTime) / 1000;
+            updateStopwatchDisplay();
+            
             const fontSize = displayCanvas.height * 0.15; // 15% of canvas height
             const padding = fontSize * 0.5;
             
@@ -1146,8 +1220,18 @@
             }
             
             // Background
-            displayCtx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            displayCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             displayCtx.fillRect(
+                x - textWidth / 2 - padding,
+                y - fontSize / 2 - padding / 2,
+                textWidth + padding * 2,
+                fontSize + padding
+            );
+            
+            // Border
+            displayCtx.strokeStyle = 'rgba(0, 255, 0, 0.3)';
+            displayCtx.lineWidth = 2;
+            displayCtx.strokeRect(
                 x - textWidth / 2 - padding,
                 y - fontSize / 2 - padding / 2,
                 textWidth + padding * 2,
@@ -1185,10 +1269,26 @@
             if (!isPlaying) return;
             
             if (currentFrameIndex >= frames.length - 1) {
-                isPlaying = false;
-                const btn = document.getElementById('playPauseBtn');
-                btn.innerHTML = '<span style="font-size: 32px;">▶️</span><span>Afspelen</span>';
-                btn.classList.remove('playing');
+                // Check if loop is enabled
+                const loopEnabled = document.getElementById('loopPlayback')?.checked;
+                
+                if (loopEnabled && displayCanvas.dataset.stopwatchMode === 'true') {
+                    // Loop back to start for stopwatch replays
+                    currentFrameIndex = 0;
+                    displayFrame(currentFrameIndex);
+                    updatePlaybackUI();
+                    
+                    // Continue playing
+                    setTimeout(() => {
+                        requestAnimationFrame(playLoop);
+                    }, 1000 / (30 * (playbackSpeed / 100)));
+                } else {
+                    // Stop at end
+                    isPlaying = false;
+                    const btn = document.getElementById('playPauseBtn');
+                    btn.innerHTML = '<span style="font-size: 32px;">▶️</span><span>Afspelen</span>';
+                    btn.classList.remove('playing');
+                }
                 return;
             }
 
@@ -1204,7 +1304,12 @@
         function displayFrame(index) {
             if (frames[index]) {
                 displayCtx.putImageData(frames[index], 0, 0);
-                redrawAnnotations();
+                
+                // Only redraw annotations for record mode
+                // Stopwatch frames already have the timer burned in
+                if (displayCanvas.dataset.stopwatchMode !== 'true') {
+                    redrawAnnotations();
+                }
             }
         }
 
