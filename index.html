@@ -1156,6 +1156,7 @@
 
         // Main button
         mainButton.onclick = async () => {
+            console.log('Main button clicked, isRunning:', isRunning, 'currentMode:', currentMode);
             if (isRunning) {
                 stop();
             } else {
@@ -1164,7 +1165,9 @@
         };
 
         async function start() {
+            console.log('Start function called, currentMode:', currentMode);
             try {
+                console.log('Requesting camera access...');
                 stream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: 'environment',
@@ -1173,9 +1176,11 @@
                     },
                     audio: false
                 });
+                console.log('Camera access granted');
 
                 sourceVideo.srcObject = stream;
                 await sourceVideo.play();
+                console.log('Video playing');
 
                 const width = sourceVideo.videoWidth;
                 const height = sourceVideo.videoHeight;
@@ -1235,7 +1240,8 @@
                 }
 
             } catch (err) {
-                alert('Camera fout: ' + err.message);
+                console.error('Camera error:', err);
+                alert('Camera fout: ' + err.message + '\n\nCheck console voor details');
             }
         }
 
