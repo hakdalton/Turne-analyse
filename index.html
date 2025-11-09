@@ -547,6 +547,64 @@
             background: rgba(255, 152, 0, 0.95);
         }
 
+        /* Stopwatch overlay */
+        #stopwatchOverlay {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            z-index: 15;
+        }
+
+        #stopwatchOverlay.show {
+            display: block;
+        }
+
+        #stopwatchTime {
+            font-size: 80px;
+            font-weight: bold;
+            color: #00FF00;
+            text-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.8),
+                0 0 40px rgba(0, 255, 0, 0.5),
+                0 4px 8px rgba(0, 0, 0, 0.8);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.05em;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px 40px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 3px solid rgba(0, 255, 0, 0.3);
+        }
+
+        #stopwatchTime.running {
+            animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { 
+                text-shadow: 
+                    0 0 20px rgba(0, 255, 0, 0.8),
+                    0 0 40px rgba(0, 255, 0, 0.5),
+                    0 4px 8px rgba(0, 0, 0, 0.8);
+            }
+            50% { 
+                text-shadow: 
+                    0 0 30px rgba(0, 255, 0, 1),
+                    0 0 60px rgba(0, 255, 0, 0.8),
+                    0 4px 8px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        /* Responsive stopwatch */
+        @media (max-width: 600px) {
+            #stopwatchTime {
+                font-size: 60px;
+                padding: 15px 30px;
+            }
+        }
+
         /* Helper text */
         .helper-text {
             font-size: 11px;
@@ -554,6 +612,33 @@
             text-align: center;
             margin-top: 8px;
             line-height: 1.4;
+        }
+
+        /* Stopwatch controls */
+        #stopwatchControls {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #stopwatchControls.show {
+            display: flex;
+        }
+
+        .stopwatch-info {
+            background: rgba(76, 175, 80, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #4CAF50;
+        }
+
+        .stopwatch-info h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .stopwatch-info p {
+            margin: 0;
         }
     </style>
 </head>
@@ -574,6 +659,11 @@
             </div>
 
             <div id="statusBadge" class="buffering">Buffering 0%</div>
+
+            <!-- Stopwatch overlay -->
+            <div id="stopwatchOverlay">
+                <div id="stopwatchTime">0.00</div>
+            </div>
 
             <div id="topBar">
                 <!-- Drawing tools -->
@@ -626,6 +716,10 @@
                     <span class="emoji">🎬</span>
                     Opname
                 </button>
+                <button class="mode-btn" data-mode="stopwatch">
+                    <span class="emoji">⏱️</span>
+                    Stopwatch
+                </button>
             </div>
 
             <div id="controlsContainer">
@@ -671,6 +765,26 @@
                     <p class="helper-text">💡 Tip: Sleep de witte balk om heen en weer te spoelen</p>
                 </div>
 
+                <!-- Stopwatch mode -->
+                <div id="stopwatchControls">
+                    <div class="stopwatch-info">
+                        <h3 style="color: #4CAF50; margin-bottom: 8px;">⏱️ Video Stopwatch</h3>
+                        <p style="font-size: 13px; color: #888; line-height: 1.5;">
+                            Perfect voor sprint tijden! De tijd wordt opgenomen in de video.
+                        </p>
+                    </div>
+                    
+                    <div class="control-row">
+                        <label>Positie:</label>
+                        <select id="stopwatchPosition" style="flex: 1; padding: 10px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 8px; font-size: 14px;">
+                            <option value="bottom">Onderaan</option>
+                            <option value="top">Bovenaan</option>
+                        </select>
+                    </div>
+
+                    <p class="helper-text">💡 Druk op START om te beginnen filmen. De stopwatch start automatisch mee!</p>
+                </div>
+
                 <button id="mainButton">
                     <span id="buttonIcon">▶️</span>
                     <span id="buttonText">Start Live Delay</span>
@@ -697,6 +811,10 @@
         // Mode controls
         const liveControls = document.getElementById('liveControls');
         const playbackControls = document.getElementById('playbackControls');
+        const stopwatchControls = document.getElementById('stopwatchControls');
+        const stopwatchOverlay = document.getElementById('stopwatchOverlay');
+        const stopwatchTime = document.getElementById('stopwatchTime');
+        const stopwatchPosition = document.getElementById('stopwatchPosition');
 
         // Sliders
         const delaySlider = document.getElementById('delaySlider');
@@ -725,6 +843,11 @@
         let drawStart = null;
         let penPath = [];
 
+        // Stopwatch state
+        let stopwatchStartTime = 0;
+        let stopwatchElapsed = 0;
+        let stopwatchInterval = null;
+
         // Update sliders
         delaySlider.oninput = () => {
             const val = parseInt(delaySlider.value);
@@ -741,6 +864,17 @@
             const val = parseInt(e.target.value);
             document.getElementById('playbackSpeedValue').textContent = val;
             playbackSpeed = val;
+        };
+
+        // Stopwatch position
+        stopwatchPosition.onchange = () => {
+            if (stopwatchPosition.value === 'top') {
+                stopwatchOverlay.style.bottom = 'auto';
+                stopwatchOverlay.style.top = '80px';
+            } else {
+                stopwatchOverlay.style.top = 'auto';
+                stopwatchOverlay.style.bottom = '80px';
+            }
         };
 
         // Mode selector
@@ -762,6 +896,7 @@
         function updateUIForMode() {
             liveControls.classList.remove('show');
             playbackControls.classList.remove('show');
+            stopwatchControls.classList.remove('show');
 
             switch(currentMode) {
                 case 'live':
@@ -773,6 +908,11 @@
                     liveControls.classList.add('show');
                     buttonIcon.textContent = '⏺️';
                     buttonText.textContent = 'Start Opname';
+                    break;
+                case 'stopwatch':
+                    stopwatchControls.classList.add('show');
+                    buttonIcon.textContent = '⏱️';
+                    buttonText.textContent = 'Start Stopwatch';
                     break;
             }
         }
@@ -844,6 +984,14 @@
                     buttonIcon.textContent = '⏹️';
                     buttonText.textContent = 'Stop Opname';
                     captureRecordLoop();
+                } else if (currentMode === 'stopwatch') {
+                    stopwatchOverlay.classList.add('show');
+                    stopwatchTime.classList.add('running');
+                    mainButton.classList.add('recording');
+                    buttonIcon.textContent = '⏹️';
+                    buttonText.textContent = 'Stop Stopwatch';
+                    startStopwatch();
+                    captureStopwatchLoop();
                 }
 
             } catch (err) {
@@ -877,6 +1025,16 @@
                 // Switch to playback mode
                 playbackControls.classList.add('show');
                 liveControls.classList.remove('show');
+                currentFrameIndex = 0;
+                displayFrame(0);
+                updatePlaybackUI();
+            } else if (currentMode === 'stopwatch') {
+                // Stop stopwatch and switch to playback
+                stopStopwatch();
+                stopwatchOverlay.classList.remove('show');
+                stopwatchTime.classList.remove('running');
+                playbackControls.classList.add('show');
+                stopwatchControls.classList.remove('show');
                 currentFrameIndex = 0;
                 displayFrame(0);
                 updatePlaybackUI();
@@ -925,6 +1083,87 @@
             setTimeout(() => {
                 animationId = requestAnimationFrame(captureRecordLoop);
             }, 1000 / 30);
+        }
+
+        function captureStopwatchLoop() {
+            if (!isRunning) return;
+
+            // Draw video frame
+            displayCtx.drawImage(sourceVideo, 0, 0);
+            
+            // Draw stopwatch on video
+            drawStopwatchOnCanvas();
+            
+            // Capture the combined frame
+            const frame = displayCtx.getImageData(0, 0, displayCanvas.width, displayCanvas.height);
+            frames.push(frame);
+
+            setTimeout(() => {
+                animationId = requestAnimationFrame(captureStopwatchLoop);
+            }, 1000 / 30);
+        }
+
+        function startStopwatch() {
+            stopwatchStartTime = Date.now();
+            stopwatchElapsed = 0;
+            updateStopwatchDisplay();
+            
+            stopwatchInterval = setInterval(() => {
+                stopwatchElapsed = (Date.now() - stopwatchStartTime) / 1000;
+                updateStopwatchDisplay();
+            }, 10); // Update every 10ms for smooth display
+        }
+
+        function stopStopwatch() {
+            if (stopwatchInterval) {
+                clearInterval(stopwatchInterval);
+                stopwatchInterval = null;
+            }
+        }
+
+        function updateStopwatchDisplay() {
+            stopwatchTime.textContent = stopwatchElapsed.toFixed(2);
+        }
+
+        function drawStopwatchOnCanvas() {
+            const fontSize = displayCanvas.height * 0.15; // 15% of canvas height
+            const padding = fontSize * 0.5;
+            
+            displayCtx.font = `bold ${fontSize}px "Courier New", monospace`;
+            displayCtx.textAlign = 'center';
+            displayCtx.textBaseline = 'middle';
+            
+            const text = stopwatchElapsed.toFixed(2);
+            const textWidth = displayCtx.measureText(text).width;
+            
+            // Position
+            const x = displayCanvas.width / 2;
+            let y;
+            if (stopwatchPosition.value === 'top') {
+                y = padding + fontSize / 2;
+            } else {
+                y = displayCanvas.height - padding - fontSize / 2;
+            }
+            
+            // Background
+            displayCtx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            displayCtx.fillRect(
+                x - textWidth / 2 - padding,
+                y - fontSize / 2 - padding / 2,
+                textWidth + padding * 2,
+                fontSize + padding
+            );
+            
+            // Glow effect
+            displayCtx.shadowColor = '#00FF00';
+            displayCtx.shadowBlur = 20;
+            
+            // Text
+            displayCtx.fillStyle = '#00FF00';
+            displayCtx.fillText(text, x, y);
+            
+            // Reset shadow
+            displayCtx.shadowBlur = 0;
         }
 
         // Playback functions
