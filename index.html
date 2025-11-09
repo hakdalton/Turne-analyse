@@ -459,6 +459,38 @@
             border-radius: 8px;
         }
 
+        /* Video control button */
+        .video-control-btn {
+            width: 100%;
+            padding: 20px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .video-control-btn:active {
+            background: #45a049;
+            transform: scale(0.98);
+        }
+
+        .video-control-btn.playing {
+            background: #FF9800;
+        }
+
+        .video-control-btn.playing:active {
+            background: #F57C00;
+        }
+
         /* Main action button */
         #mainButton {
             width: 100%;
@@ -619,35 +651,24 @@
                             <div id="timelineHandle"></div>
                         </div>
                         <div id="frameInfo">
-                            <span>Frame: <strong id="currentFrame">0/0</strong></span>
-                            <span>Tijd: <strong id="currentTime">0.0s</strong></span>
+                            <span><strong id="currentTime">0.0s</strong> / <span id="totalTime">0.0s</span></span>
                         </div>
                     </div>
 
-                    <div class="nav-buttons">
-                        <button class="nav-btn" onclick="jumpToStart()" title="Naar begin">⏮️</button>
-                        <button class="nav-btn" onclick="previousFrame()" title="Vorige frame">◀️</button>
-                        <button class="nav-btn primary" id="playPauseBtn" onclick="togglePlayPause()" title="Play/Pause">▶️</button>
-                        <button class="nav-btn" onclick="nextFrame()" title="Volgende frame">▶️</button>
-                        <button class="nav-btn" onclick="jumpToEnd()" title="Naar einde">⏭️</button>
-                    </div>
-
-                    <div class="skip-buttons">
-                        <button class="skip-btn" onclick="skipFrames(-30)">◀◀ -1s</button>
-                        <button class="skip-btn" onclick="skipFrames(-10)">◀ -10 frames</button>
-                        <button class="skip-btn" onclick="skipFrames(10)">10 frames ▶</button>
-                        <button class="skip-btn" onclick="skipFrames(30)">1s ▶▶</button>
-                    </div>
+                    <button class="video-control-btn" id="playPauseBtn" onclick="togglePlayPause()">
+                        <span style="font-size: 32px;">▶️</span>
+                        <span>Afspelen</span>
+                    </button>
 
                     <div id="speedControl">
                         <div class="control-row">
                             <label>Snelheid:</label>
-                            <input type="range" id="playbackSpeed" min="10" max="200" value="50" step="10">
+                            <input type="range" id="playbackSpeed" min="25" max="200" value="50" step="25">
                             <span class="value-display"><span id="playbackSpeedValue">50</span>%</span>
                         </div>
                     </div>
 
-                    <p class="helper-text">💡 Tip: Sleep de witte balk voor snelle navigatie. Gebruik skip-knoppen voor grote sprongen.</p>
+                    <p class="helper-text">💡 Tip: Sleep de witte balk om heen en weer te spoelen</p>
                 </div>
 
                 <button id="mainButton">
@@ -909,9 +930,15 @@
         // Playback functions
         function togglePlayPause() {
             isPlaying = !isPlaying;
-            document.getElementById('playPauseBtn').textContent = isPlaying ? '⏸️' : '▶️';
+            const btn = document.getElementById('playPauseBtn');
+            
             if (isPlaying) {
+                btn.innerHTML = '<span style="font-size: 32px;">⏸️</span><span>Pauzeren</span>';
+                btn.classList.add('playing');
                 playLoop();
+            } else {
+                btn.innerHTML = '<span style="font-size: 32px;">▶️</span><span>Afspelen</span>';
+                btn.classList.remove('playing');
             }
         }
 
@@ -920,7 +947,9 @@
             
             if (currentFrameIndex >= frames.length - 1) {
                 isPlaying = false;
-                document.getElementById('playPauseBtn').textContent = '▶️';
+                const btn = document.getElementById('playPauseBtn');
+                btn.innerHTML = '<span style="font-size: 32px;">▶️</span><span>Afspelen</span>';
+                btn.classList.remove('playing');
                 return;
             }
 
@@ -933,50 +962,6 @@
             }, 1000 / (30 * (playbackSpeed / 100)));
         }
 
-        function nextFrame() {
-            isPlaying = false;
-            document.getElementById('playPauseBtn').textContent = '▶️';
-            if (currentFrameIndex < frames.length - 1) {
-                currentFrameIndex++;
-                displayFrame(currentFrameIndex);
-                updatePlaybackUI();
-            }
-        }
-
-        function previousFrame() {
-            isPlaying = false;
-            document.getElementById('playPauseBtn').textContent = '▶️';
-            if (currentFrameIndex > 0) {
-                currentFrameIndex--;
-                displayFrame(currentFrameIndex);
-                updatePlaybackUI();
-            }
-        }
-
-        function jumpToStart() {
-            isPlaying = false;
-            document.getElementById('playPauseBtn').textContent = '▶️';
-            currentFrameIndex = 0;
-            displayFrame(currentFrameIndex);
-            updatePlaybackUI();
-        }
-
-        function jumpToEnd() {
-            isPlaying = false;
-            document.getElementById('playPauseBtn').textContent = '▶️';
-            currentFrameIndex = frames.length - 1;
-            displayFrame(currentFrameIndex);
-            updatePlaybackUI();
-        }
-
-        function skipFrames(amount) {
-            isPlaying = false;
-            document.getElementById('playPauseBtn').textContent = '▶️';
-            currentFrameIndex = Math.max(0, Math.min(frames.length - 1, currentFrameIndex + amount));
-            displayFrame(currentFrameIndex);
-            updatePlaybackUI();
-        }
-
         function displayFrame(index) {
             if (frames[index]) {
                 displayCtx.putImageData(frames[index], 0, 0);
@@ -985,11 +970,11 @@
         }
 
         function updatePlaybackUI() {
-            const progress = (currentFrameIndex / (frames.length - 1)) * 100;
+            const progress = (currentFrameIndex / Math.max(1, frames.length - 1)) * 100;
             document.getElementById('timelineProgress').style.width = progress + '%';
             document.getElementById('timelineHandle').style.left = progress + '%';
-            document.getElementById('currentFrame').textContent = `${currentFrameIndex + 1}/${frames.length}`;
             document.getElementById('currentTime').textContent = `${(currentFrameIndex / 30).toFixed(1)}s`;
+            document.getElementById('totalTime').textContent = `${((frames.length - 1) / 30).toFixed(1)}s`;
         }
 
         // Timeline interaction
@@ -1014,10 +999,15 @@
             const timeline = document.getElementById('timeline');
             const rect = timeline.getBoundingClientRect();
             const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-            currentFrameIndex = Math.floor(percent * (frames.length - 1));
+            currentFrameIndex = Math.floor(percent * Math.max(0, frames.length - 1));
             
-            isPlaying = false;
-            document.getElementById('playPauseBtn').textContent = '▶️';
+            // Pause when scrubbing
+            if (isPlaying) {
+                isPlaying = false;
+                const btn = document.getElementById('playPauseBtn');
+                btn.innerHTML = '<span style="font-size: 32px;">▶️</span><span>Afspelen</span>';
+                btn.classList.remove('playing');
+            }
             
             displayFrame(currentFrameIndex);
             updatePlaybackUI();
